@@ -1,95 +1,119 @@
-# PROGRAM PEMESANAN MAKANAN
+# SISTEM PEMESANAN MAKANAN
+# PROJEK 1 MATA KULIAH WI1102 - BERPIKIR KOMPUTASIONAL
+# KELAS 31 - KELOMPOK 5:
+# 1. 19624218 Tiara Clianta Andiwi
+# 2. 19624235 Muhammad Akmal
+# 3. 19624250 Ahmad Rinofaros Muchtar
+# 4. 19624264 Muh. Hartawan Haidir
+# 5. 19624284 Muthia Ariesta Anggraeni
+
+# (c) 2024. Bandung. Sekolah Teknik Elektro dan Informatika - Komputasi. Institut Teknologi Bandung.
 
 # DESKRIPSI
-# ...
+# Program ini adalah simulasi dari sistem pemesanan makanan yang memungkinkan pengguna untuk memesan makanan dari meja mereka dan diberitahu saat pesanan mereka sudah siap. Program ini terdiri dari dua sisi: sisi server dan sisi klien. Sisi server bertanggung jawab untuk mengelola database menu, antrean pesanan, dan memproses pesanan. Sisi klien bertanggung jawab untuk menampilkan menu, mengambil pesanan pengguna, dan memberitahu pengguna saat pesanan sudah siap.
 
 # KAMUS
 # ...
 
-
 # ALGORITMA
 
-import queue
+import collections
 
-# Models
-class Menu:
-    def __init__(self, id: int, nama: str, harga: int):
-        self.id = id
-        self.nama = nama
-        self.harga = harga
-
-    def __str__(self):
-        return f"{self.nama} (Rp{self.harga})"
-
-
-class Pesanan:
-    def __init__(self, id: int, pesanan: list[Menu]):
-        self.id = id
-        self.daftar = pesanan
-        self.status = "Belum Diproses"
-
-    def tambah_pesanan(self, pesanan: Menu):
-        self.daftar.append(pesanan)
-
-    def __str__(self):
-        daftar_menu = ''
-        for menu in self.daftar :
-            daftar_menu = daftar_menu.join(['\n-', str(menu)])
-        return f"Pesanan ke #{self.id}: {daftar_menu} \nStatus Pesanan: {self.status}"
 
 class User:
-    def __init__(self, id, nama, no_meja):
-        self.id = id
+    ID: int
+
+    def __init__(self, nama: str, telp: str):
         self.nama = nama
-        self.no_meja = no_meja
-        self.pesanan = []
+        self.telp = telp
+        self.order = []
+        return
+    
+    def tambah_order(self, order: "Order"):
+        self.order.append(order)
+        return
+    
+    def batal_order(self, order_id: int):
+        self.order.pop(self.order.index(order_id))
+        return
+    
+    def cek_order(self, order_id: int):
+        order = self.order[self.order.index(order_id)]
+        return order
+    
+    def cek_daftar_order(self):
+        return self.order
+    
+    def siap_order(self, order_id: int):
+        order = self.order[self.order.index(order_id)]
+        if (order.status == "Siap"):
+            # Hubungi pengguna
+            print("Pesanan sudah siap!")
+        return
+    
+    def __str__(self):
+        return f"{self.nama} ({self.telp})"
+    
+class Order:
+    ID: int
+    def __init__(self, meja: int, user: User, items: list[list["Item", int]], status: str):
+        self.meja = meja
+        self.user = user
+        self.status = status
+        self.items = items
+        return
+    
+    def tambah_item(self, item: "Item", qty: int):
+        if item in self.items:
+            self.items[self.items.index(item)][1] += qty
+        else :
+            self.items.append([item, qty])
+        return
+    
+    def edit_item(self, item: "Item", qty: int):
+        self.items[self.items.index(item)][1] = qty
+        return
+    
+    def hapus_item(self, item: "Item"):
+        self.items.pop(self.items.index(item))
+        return
+    
+    def __str__(self):
+        return f"Pesanan #{self.ID} \n a.n. {self.user.nama} ({self.user.telp}) \n Meja {self.meja} \n {self.items} \n Status: {self.status}"
+    
+class Item:
+    ID: int
+    def __init__(self, nama: str, harga: int):
+        self.nama = nama
+        self.harga = harga
+        return
+    
+    def __str__(self):
+        return f"Menu #{self.ID} : {self.nama} | Rp{self.harga})"
 
-        
-# Server Logic
-class MenuDB:
-    def __init__(self, data):
-        self.menu = data
-
-    def get_item(self, item_id):
-        item_data = self.menu.get(str(item_id))
-        if item_data:
-            return Item(id=item_id, nama=item_data["name"], harga=item_data["price"])
-        else:
-            return None
-
-class OrderQueue:
-    def __init__(self):
-        self.queue = queue.Queue()
-
-    def add_order(self, order):
-        self.queue.put(order)
-        print(f"Order {order.id} added to queue.")
-
-    def get_next_order(self):
-        return self.queue.get() if not self.queue.empty() else None
-
-# Client Interface
-def simulate_user_order(menu_db, order_queue, user):
-    item = menu_db.get_item(1)  # Example: ordering item with ID 1 (Burger)
-    order = Order(id=1, items=[item])
-    user.place_order(order)
-    order_queue.add_order(order)
-
-# Main App Flow
-def main():
-    # Setup
-    menu_db = MenuDB(MENU_DATA)
-    order_queue = OrderQueue()
-    user = User(id=1, nama="Alice", no_meja=3)
-
-    # Simulate placing an order
-    simulate_user_order(menu_db, order_queue, user)
-
-    # Process an order
-    next_order = order_queue.get_next_order()
-    if next_order:
-        next_order.status = "Completed"
-        print(f"Chef processed {next_order}")
-
-if __name__ == "__main__":
-    main()
+class Admin:
+    antrean = collections.deque(Order)
+    def __init__(self, username: str, password: str):
+        self.username = username
+        self.password = password
+        return
+    
+    def lihat_antrean(self):
+        return self.antrean
+    
+    def lihat_order(self, order_id: int):
+        order = self.antrean[self.antrean.index(order_id)]
+        return order
+    
+    def proses_order(self, order_id: int):
+        order = self.antrean[self.antrean.index(order_id)]
+        for item in order.items:
+            print(item)
+        return
+    
+    def selesai_order(self, order_id: int):
+        order: Order
+        order = self.antrean[self.antrean.index(order_id)]
+        order.status = "Siap"
+        return
+    
