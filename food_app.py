@@ -1,119 +1,277 @@
-# SISTEM PEMESANAN MAKANAN
-# PROJEK 1 MATA KULIAH WI1102 - BERPIKIR KOMPUTASIONAL
-# KELAS 31 - KELOMPOK 5:
-# 1. 19624218 Tiara Clianta Andiwi
-# 2. 19624235 Muhammad Akmal
-# 3. 19624250 Ahmad Rinofaros Muchtar
-# 4. 19624264 Muh. Hartawan Haidir
-# 5. 19624284 Muthia Ariesta Anggraeni
+"""
+SISTEM PEMESANAN MAKANAN
+PROJEK 1 MATA KULIAH WI1102 - BERPIKIR KOMPUTASIONAL
+KELAS 31 - KELOMPOK 5:
+1. 19624218 Tiara Clianta Andiwi
+2. 19624235 Muhammad Akmal
+3. 19624250 Ahmad Rinofaros Muchtar
+4. 19624264 Muh. Hartawan Haidir
+5. 19624284 Muthia Ariesta Anggraeni
 
-# (c) 2024. Bandung. Sekolah Teknik Elektro dan Informatika - Komputasi. Institut Teknologi Bandung.
+(c) 2024. Bandung. Sekolah Teknik Elektro dan Informatika. Institut Teknologi Bandung.
+"""
 
-# DESKRIPSI
-# Program ini adalah simulasi dari sistem pemesanan makanan yang memungkinkan pengguna untuk memesan makanan dari meja mereka dan diberitahu saat pesanan mereka sudah siap. Program ini terdiri dari dua sisi: sisi server dan sisi klien. Sisi server bertanggung jawab untuk mengelola database menu, antrean pesanan, dan memproses pesanan. Sisi klien bertanggung jawab untuk menampilkan menu, mengambil pesanan pengguna, dan memberitahu pengguna saat pesanan sudah siap.
+"""
+DESKRIPSI
+Program ini adalah simulasi dari sistem pemesanan makanan yang memungkinkan pengguna untuk memesan makanan dari meja mereka dan diberitahu saat pesanan mereka sudah siap. Program ini terdiri dari dua sisi: sisi server dan sisi klien. Sisi server bertanggung jawab untuk mengelola database menu, antrean pesanan, dan memproses pesanan. Sisi klien bertanggung jawab untuk menampilkan menu, mengambil pesanan pengguna, dan memberitahu pengguna saat pesanan sudah siap.
+"""
 
 # KAMUS
 # ...
 
 # ALGORITMA
 
-import collections
+import enum
+import datetime
+import copy
 
-
-class User:
-    ID: int
-
-    def __init__(self, nama: str, telp: str):
+class Item:
+    """
+    Representasi objek dari menu makanan atau minuman yang ada di menu restoran.
+    
+    Atribut:
+    - ID Menu: `ID: int`
+    - Nama: `nama: str`
+    - Harga: `harga: int`
+    """
+    counter = 0
+    def __init__(self, nama: str, harga: int):
+        Item.counter += 1
         self.nama = nama
-        self.telp = telp
-        self.order = []
-        return
-    
-    def tambah_order(self, order: "Order"):
-        self.order.append(order)
-        return
-    
-    def batal_order(self, order_id: int):
-        self.order.pop(self.order.index(order_id))
-        return
-    
-    def cek_order(self, order_id: int):
-        order = self.order[self.order.index(order_id)]
-        return order
-    
-    def cek_daftar_order(self):
-        return self.order
-    
-    def siap_order(self, order_id: int):
-        order = self.order[self.order.index(order_id)]
-        if (order.status == "Siap"):
-            # Hubungi pengguna
-            print("Pesanan sudah siap!")
-        return
+        self.harga = harga
+        self.ID = Item.counter
     
     def __str__(self):
-        return f"{self.nama} ({self.telp})"
+        return f"#{self.ID:02d}. {self.nama} | Rp{self.harga}\n"
+
+class Status(enum.Enum):
+    """Enumerasi status pesanan."""
+    PENDING = "Menunggu dikonfirmasi"
+    CONFIRMED = "Dikonfirmasi, dalam antrean"
+    IN_PROGRESS = "Dalam proses"
+    READY = "Siap diambil"
+    COMPLETED = "Selesai"
+
+# Daftar Menu
+Menu = [
+    Item("Ayam Goreng", 10000),
+    Item("Ayam Bakar", 12000),
+    Item("Ayam Geprek", 15000),
+    Item("Ayam Kremes", 12000),
+    Item("Bakso Sapi", 10000),
+    Item("Bakso Beranak", 12000),
+    Item("Mie Ayam", 12000),
+    Item("Mie Goreng", 12000),
+    Item("Mie Rebus", 12000),
+    Item("Mie Pangsit", 12000),
+    Item("Soto Ayam", 15000),
+    Item("Soto Betawi", 20000),
+    Item("Soto Padang", 25000),
+    Item("Sate Ayam", 15000),
+    Item("Sate Kambing", 20000),
+    Item("Sate Padang", 25000),
+    Item("Nasi Putih", 5000),
+    Item("Nasi Goreng", 15000),
+    Item("Nasi Uduk", 12000),
+    Item("Nasi Kuning", 12000),
+    Item("Air Mineral", 3000),
+    Item("Es Teh", 5000),
+    Item("Es Jeruk", 6000),
+    Item("Es Campur", 8000),
+    Item("Jus Alpukat", 10000),
+    Item("Jus Mangga", 10000),
+    Item("Jus Jeruk", 10000),
+]
+
+# Fungsi terpisah untuk melihat daftar menu
+def lihat_menu():
+    output = f"Menu Makanan dan Minuman:"
+    output += f"{'No.':<5} {'Item':<15} {'Harga':<10}\n"
+    output += f"-" * 30 + "\n"
+    for item in Menu:
+        output += f"{item}"
     
+    print(output)
+
 class Order:
-    ID: int
-    def __init__(self, meja: int, user: User, items: list[list["Item", int]], status: str):
+    """
+    Representasi sebuah pesanan.
+    
+    Atribut:
+    - ID Pesanan: `id: str`
+    - No. Meja: `no_meja: int`
+    - User pemesan: `user: User`
+    - Daftar Pesanan: `items: List[[Item, int]]`
+    - Status Pesanan: `status: str`
+    - Total harga: `total: int`
+    """
+    counter = 0
+    def __init__(self, meja: int, user: "User"):
         self.meja = meja
         self.user = user
-        self.status = status
-        self.items = items
-        return
+        self.items = []
+        self.status = Status.PENDING
+        self.ID = self.id_generator()
+
+    def id_generator(self):
+        """
+        Membuat ID komposit unik dengan format:
+        O-XXX-NO-USR--HHMMSS:
+          - O mengindikasikan ini adalah ID Order (Pesanan)
+          - XXX mengindikasikan nomor order
+          - NO adalah 2 digit nomor meja
+          - USR menunjuk pada inisial user
+          - HHMMSS adalah waktu ketika pesanan dibuat
+        """
+        Order.counter += 1
+        timestamp = datetime.datetime.now().strftime("%H%M%S")
+        return f"O-{Order.counter:03d}-{self.meja:02d}-{self.user.ID[2:4]-{timestamp}}"
     
-    def tambah_item(self, item: "Item", qty: int):
+    def cek_total(self):
+        """Menghitung total harga pesanan."""
+        total = 0
+        for item in self.items:
+            total += item[0].harga * item[1]
+        self.total = total
+        return self.total
+    
+    def tambah_item(self, item: Item, qty: int):
+        """
+        Menambahkan item ke dalam pesanan jika belum ada.
+        Jika sudah ada, tambahkan jumlahnya.
+        """
         if item in self.items:
             self.items[self.items.index(item)][1] += qty
         else :
             self.items.append([item, qty])
-        return
     
     def edit_item(self, item: "Item", qty: int):
-        self.items[self.items.index(item)][1] = qty
-        return
+        """Mengedit jumlah item dalam pesanan."""
+        try:
+            self.items[self.items.index(item)][1] = qty
+            if qty <= 0:
+                self.hapus_item(item)
+        except:
+            print("Item tidak ditemukan.")
     
     def hapus_item(self, item: "Item"):
-        self.items.pop(self.items.index(item))
-        return
+        try: 
+            self.items.pop(self.items.index(item))
+        except:
+            print("Item tidak ditemukan.")
+        
+    def edit_status(self, status):
+        self.status = status
     
     def __str__(self):
-        return f"Pesanan #{self.ID} \n a.n. {self.user.nama} ({self.user.telp}) \n Meja {self.meja} \n {self.items} \n Status: {self.status}"
+        output = f"Pesanan {self.ID}\n"
+        output += f"Nama: {self.user.nama}\nTelp: {self.user.telp})\n"
+        output += f"Meja {self.meja}\nStatus Pesanan: {self.status}\n"
+        output += f"{'No.':<5} {'Item':<15} {'Harga':<10} {'Jumlah':<10}\n"
+        output += "-" * 40 + "\n"
+        for i, item in self.items:
+            item: list[Item, int]
+            output += f"{i+1:<5} {item[0].nama:<15} Rp{item.harga:<10.2f} {item[1]:<10}\n"
+        output += f"Total Harga: Rp{self.cek_total()}"
+        return output
     
-class Item:
-    ID: int
-    def __init__(self, nama: str, harga: int):
-        self.nama = nama
-        self.harga = harga
-        return
-    
-    def __str__(self):
-        return f"Menu #{self.ID} : {self.nama} | Rp{self.harga})"
+# Antrean Pesanan
+order_queue = []
 
+class User:
+    """
+    Berisi semua informasi berkaitan dengan data pemesan.
+
+    Atribut:
+    - User ID: `id: int`
+    - Nama: `nama: str`
+    - No. Telepon: `telp: str`
+    - Daftar Pesanan: `order: List[Order]`
+    """
+
+    counter = 0
+    def __init__(self, nama: str, telp: str):
+        self.ID = self.id_generator()
+        self.nama = nama
+        self.telp = telp
+        self.orders = {}
+        return
+    
+    def id_generator(self):
+        """
+        Membuat ID komposit unik dengan format:
+        U-XXX-ABC:
+          - U mengindikasikan ini adalah ID User
+          - XXX adalah urutan nomor user yang dibuat
+          - ABC adalah inisial nama user
+        """
+        initial = self.nama[:3].upper()
+        User.counter += 1
+        return f"U-{User.counter:03d}-{initial}"
+
+    def tambah_order(self, order: Order):
+        """Menambahkan pesanan ke dalam daftar pesanan pengguna."""
+        self.orders[order.ID] = order
+        order_queue.append(order)
+        order.status = Status.CONFIRMED
+        return
+        
+    def lihat_order(self, order_id: str):
+        """Melihat detail pesanan berdasarkan ID pesanan."""
+        return self.orders.get(order_id)
+    
+
+    def lihat_daftar(self):
+        """Melihat daftar pesanan yang dimiliki pengguna."""
+        output = ""
+        for order in self.orders:
+            output += f"{order}\n"
+        return output
+    
+    def notifikasi(self, order: Order):
+        """Memberitahu pengguna bahwa pesanannya sudah siap."""
+        if order.status == Status.READY:
+            print(f"Pesanan {order.ID} sudah siap diambil.")
+            while True:
+                jawab = input("Apakah pesanan sudah diambil? (Y/n) : ")
+                if jawab == "Y":
+                    order.edit_status(Status.COMPLETED)
+                    break
+                elif jawab == "N":
+                    break
+                else:
+                    print("Input tidak dikenal.")
+        return
+
+    def __str__(self):
+        output = f"User ID: {self.ID}\n"
+        output += f"Nama: {self.nama}\n"
+        output += f"Telepon: {self.telp}\n"
+        return output
+    
 class Admin:
-    antrean = collections.deque(Order)
     def __init__(self, username: str, password: str):
-        self.username = username
-        self.password = password
+        self._username = username
+        self._password = password
+        self.auth = False
         return
     
     def lihat_antrean(self):
         return self.antrean
     
     def lihat_order(self, order_id: int):
-        order = self.antrean[self.antrean.index(order_id)]
+        order = 0 #self.antrean[self.antrean.index(order_id)]
         return order
     
     def proses_order(self, order_id: int):
-        order = self.antrean[self.antrean.index(order_id)]
+        order: Order #= self.antrean[self.antrean.index(order_id)]
         for item in order.items:
             print(item)
         return
     
     def selesai_order(self, order_id: int):
         order: Order
-        order = self.antrean[self.antrean.index(order_id)]
+        #order = self.antrean[self.antrean.index(order_id)]
         order.status = "Siap"
         return
 
@@ -220,7 +378,7 @@ def langkah_tujuh():
 
 #Langkah 8(Koki memproses pesanan)
 def langkah_delapan():
-    if array_pesanan == []:#Kosong
+    #if array_pesanan == []: Kosong
         #Langkah 4
         pass
 
@@ -262,3 +420,5 @@ def langkah_sebelas():
 def langkah_dua_belas():
     ##Selesai:
     pass
+
+
