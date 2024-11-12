@@ -4,7 +4,7 @@ PROJEK 1 MATA KULIAH WI1102 - BERPIKIR KOMPUTASIONAL
 KELAS 31 - KELOMPOK 5:
 1. 19624218 Tiara Clianta Andiwi
 2. 19624235 Muhammad Akmal
-3. 196242Interface.lebar Ahmad Rinofaros Muchtar
+3. 19624250 Ahmad Rinofaros Muchtar
 4. 19624264 Muh. Hartawan Haidir
 5. 19624284 Muthia Ariesta Anggraeni
 
@@ -15,26 +15,16 @@ KELAS 31 - KELOMPOK 5:
 DESKRIPSI
 Program ini adalah simulasi dari sistem pemesanan makanan yang memungkinkan pengguna untuk memesan makanan dari meja mereka dan diberitahu saat pesanan mereka sudah siap. Program ini terdiri dari dua sisi: sisi server dan sisi klien yang disatukan dalam satu sisi antarmuka. 
 
-Sisi server bertanggung jawab untuk mengelola database menu, antrean pesanan, dan memproses pesanan.
-
-Sisi klien bertanggung jawab untuk menampilkan menu, mengambil pesanan pengguna, dan memberitahu pengguna saat pesanan sudah siap.
-
-Sisi antarmuka menyatukan kedua sisi agar dapat berjalan dalam satu logika yang selaras.
+Sisi server bertanggung jawab untuk mengelola database menu, antrean pesanan, dan memproses pesanan. Sisi klien bertanggung jawab untuk menampilkan menu, mengambil pesanan pengguna, dan memberitahu pengguna saat pesanan sudah siap. Sisi antarmuka menyatukan kedua sisi agar dapat berjalan dalam satu logika yang selaras.
 """
 
 """
 KAMUS
-Sistem penjelasan kamus variabel dilakukan pada setiap definisi untuk memudahkan pembacaan daripada mendefinsikan semua fungsi dan variabel di sini lantaran banyaknya nama yang harus dilacak.
+Sistem penjelasan kamus variabel dilakukan pada setiap definisi untuk memudahkan pembacaan daripada mendefinsikan semua fungsi dan variabel di sini lantaran banyaknya nama yang harus dilacak. 
 
-Kami menerapkan penggunaan docstring untuk setiap definisi kelas agar mempermudak melacak kelas dan memanfaatkan integrasi pada kode editor seperti VS Code.
+Kami menerapkan penggunaan docstring untuk setiap definisi kelas agar mempermudak melacak kelas dan memanfaatkan integrasi pada kode editor seperti VS Code. Fungsi dan metode yang diberi komentar/docstring adalah fungsi yang dibuat oleh penulis program. Kami mengasumsikan pembaca program sudah mengetahui fungsi bawaan seperti `__init__` dan `__str__` sehingga tidak perlu menjelaskan lagi.
 
-Fungsi dan metode yang diberi komentar/docstring adalah fungsi yang dibuat oleh penulis program. Kami mengasumsikan pembaca program sudah mengetahui fungsi bawaan seperti `__init__` dan `__str__` sehingga tidak perlu menjelaskan lagi.
-
-Sebisa mungkin, kami menerapkan typehinting pada setiap parameter sesuai syntax Python, diindikasikan dengan format (nama_variabel: tipe_variabel). 
-
-Typehinting dilakukan agar Pylance (ekstensi Python di VS Code) dapat mengenali objek dan menyesuaikan metode yang terdapat padanya.
-
-Jika tidak ada typehinting, tipe data bisa disimpulkan dari komentar yang ada.
+Sebisa mungkin, kami menerapkan typehinting pada setiap parameter sesuai syntax Python, diindikasikan dengan format (nama_variabel: tipe_variabel). Typehinting dilakukan agar Pylance (ekstensi Python di VS Code) dapat mengenali objek dan menyesuaikan metode yang terdapat padanya. Jika tidak ada typehinting, tipe data bisa disimpulkan dari komentar yang ada.
 
 """
 
@@ -208,7 +198,7 @@ class Order:
         output += "-" * 67 + "\n"
         for item in self.items:
             item: list[Item, int]
-            output += f"{self.items.index(item)+1:02d} | {item} | {item[1]:^5} | Rp {item[0].harga * item[1]:10,.2f}\n"
+            output += f"{self.items.index(item)+1:02d} | {item[0]} | {item[1]:^5} | Rp {item[0].harga * item[1]:10,.2f}\n"
         output += "-" * 67 + "\n"
         output += f"Total | Rp {self.cek_total():,.2f}\n".rjust(67)
         output += "~" * 67 + "\n"
@@ -217,7 +207,7 @@ class Order:
     def __str__(self):
         output = f"ID Pesanan: {self.ID}\n"
         output += f"   Meja: {self.meja}\n"
-        output += f"   Status Pesanan: {self.status}\n"
+        output += f"   Status Pesanan: {self.status.value}\n"
         output += f"   Jumlah Item: {self.cek_jumlah()}\n"
         output += f"   Total Harga: Rp {self.cek_total():,.2f}\n"
         return output
