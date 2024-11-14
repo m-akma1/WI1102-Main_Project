@@ -174,16 +174,16 @@ Menu = [
 ]
 
 # GUI Setup using tkinter
-class FoodOrderApp:
+class Interface:
     def __init__(self, root: tk.Tk):
         self.root: tk.Tk = root
         self.root.title("Food Ordering System")
         self.root.geometry("500x400")
-        self.root.resizable(False, False)
+        self.root.resizable(True, True)
         
-        self.create_main_interface()
+        self.hal_utama()
 
-    def create_main_interface(self):
+    def hal_utama(self):
         """Membuat antarmuka utama untuk memilih sebagai pengguna atau koki"""
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -191,57 +191,63 @@ class FoodOrderApp:
         self.header = tk.Label(self.root, text="Selamat Datang di Panda Manis", font=("Arial", 18))
         self.header.pack(pady=20)
 
-        self.user_button = tk.Button(self.root, text="Pengguna Baru", width=15, height=2, command=self.new_user_interface)
-        self.user_button.pack(pady=10)
+        self.tombol_daftar = tk.Button(self.root, text="Pengguna Baru", width=15, height=2, command=self.hal_daftar_pengguna)
+        self.tombol_daftar.pack(pady=10)
         
-        self.login_button = tk.Button(self.root, text="Login Pengguna", width=15, height=2, command=self.login_user_interface)
-        self.login_button.pack(pady=10)
+        self.tombol_masuk = tk.Button(self.root, text="Login Pengguna", width=15, height=2, command=self.hal_masuk_pengguna)
+        self.tombol_masuk.pack(pady=10)
         
-        self.chef_button = tk.Button(self.root, text="Koki", width=15, height=2, command=self.chef_interface)
-        self.chef_button.pack(pady=10)
+        self.tombol_koki = tk.Button(self.root, text="Koki", width=15, height=2, command=self.hal_masuk_koki)
+        self.tombol_koki.pack(pady=10)
 
-    def new_user_interface(self):
+    def hal_daftar_pengguna(self):
         """Membuat antarmuka untuk pengguna baru untuk melakukan pemesanan"""
         for widget in self.root.winfo_children():
             widget.destroy()
         
+        self.header = tk.Label(self.root, text="Daftar Pengguna Baru", font=("Arial", 14))
+        self.header.pack(pady=20)
+
         tk.Label(self.root, text="Nama: ").pack(pady=5)
-        self.nama_entry = tk.Entry(self.root)
-        self.nama_entry.pack(pady=10)
+        self.masukan_nama = tk.Entry(self.root)
+        self.masukan_nama.pack(pady=10)
 
         tk.Label(self.root, text="Nomor Telepon: \nFormat: 628XXXXXXXX...").pack(pady=5)
-        self.telp_entry = tk.Entry(self.root)
-        self.telp_entry.pack(pady=10)
+        self.masukan_telp = tk.Entry(self.root)
+        self.masukan_telp.pack(pady=10)
 
-        submit_button = tk.Button(self.root, text="Submit", command=self.create_user)
-        submit_button.pack(pady=20)
+        tombol_kirim = tk.Button(self.root, text="Kirim", command=self.buat_user_baru)
+        tombol_kirim.pack(pady=20)
 
-        back_button = tk.Button(self.root, text="Kembali", command=self.create_main_interface)
-        back_button.pack(pady=5)
+        tombol_kembali = tk.Button(self.root, text="Kembali", command=self.hal_utama)
+        tombol_kembali.pack(pady=5)
 
-    def login_user_interface(self):
+    def hal_masuk_pengguna(self):
         """Membuat antarmuka untuk pengguna yang sudah ada untuk login"""
         for widget in self.root.winfo_children():
             widget.destroy()
         
+        self.header = tk.Label(self.root, text="Login Pengguna", font=("Arial", 14))
+        self.header.pack(pady=20)
+
         tk.Label(self.root, text="Masukkan User ID: ").pack(pady=5)
-        self.login_userID_entry = tk.Entry(self.root)
-        self.login_userID_entry.pack(pady=10)
+        self.masukan_userID = tk.Entry(self.root)
+        self.masukan_userID.pack(pady=10)
 
         tk.Label(self.root, text="Masukkan Nomor Telepon: ").pack(pady=5)
-        self.login_telp_entry = tk.Entry(self.root)
-        self.login_telp_entry.pack(pady=10)
+        self.masukan_telp_ = tk.Entry(self.root)
+        self.masukan_telp_.pack(pady=10)
 
-        login_button = tk.Button(self.root, text="Login", command=self.login_user)
-        login_button.pack(pady=20)
+        tombol_masuk = tk.Button(self.root, text="Masuk", command=self.masuk_user)
+        tombol_masuk.pack(pady=20)
 
-        back_button = tk.Button(self.root, text="Kembali", command=self.create_main_interface)
-        back_button.pack(pady=5)
+        tombol_kembali = tk.Button(self.root, text="Kembali", command=self.hal_utama)
+        tombol_kembali.pack(pady=5)
 
-    def create_user(self):
+    def buat_user_baru(self):
         """Membuat order baru berdasarkan input dari pengguna"""
-        nama = self.nama_entry.get()
-        telp = self.telp_entry.get()
+        nama = self.masukan_nama.get()
+        telp = self.masukan_telp.get()
 
         # Validasi Nama
         nama = nama.strip()
@@ -256,32 +262,121 @@ class FoodOrderApp:
         
         user = User(nama, telp)
         messagebox.showinfo("Berhasil", f"User berhasil dibuat dengan ID: {user.ID}")
-        self.create_main_interface()
+        self.hal_utama()
 
-    def login_user(self):
+    def masuk_user(self):
         """Fungsi untuk login pengguna yang sudah ada"""
-        userID = self.login_userID_entry.get()
-        telp = self.login_telp_entry.get()
+        userID = self.masukan_userID.get()
+        telp = self.masukan_telp_.get()
 
         if not (userID and telp):
             messagebox.showwarning("Input Error", "Semua bidang harus diisi!")
             return
         
-        user_found = User.users.get()
-        if not user_found:
+        user_ditemukan = User.users.get(userID)
+        if not user_ditemukan:
             messagebox.showerror("Login Gagal", "Pengguna tidak ditemukan!")
         else:
-            user_telp = user_found.telp            
+            user_telp = user_ditemukan.telp            
             if user_telp == telp:
-                messagebox.showinfo("Login Berhasil", f"Selamat datang kembali, {user_found.nama}!")
-                self.create_main_interface()
+                messagebox.showinfo("Login Berhasil", f"Selamat datang kembali, {user_ditemukan.nama}!")
+                self.hal_beranda_user(user_ditemukan)
             else:
                 messagebox.showerror("Login Gagal", "Nomor telepon tidak sesuai User ID!")
 
-    def chef_interface(self):
+    def hal_beranda_user(self, user: User):
+        """Membuat antarmuka beranda setelah login pengguna."""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        tk.Label(self.root, text=f"Beranda Pengguna - {user.nama}", font=("Arial", 16)).pack(pady=10)
+
+        # Order History
+        tk.Label(self.root, text="Riwayat Pesanan:", font=("Arial", 14)).pack(pady=5)
+        history_frame = tk.Frame(self.root)
+        history_frame.pack(pady=5)
+        
+        orders = [order for order in Order.history if order.user == user]
+        if orders:
+            for order in orders:
+                order_info = f"ID: {order.ID} | Meja: {order.meja} | Status: {order.status.value} | Total: Rp {order.cek_total():,.2f}"
+                tk.Label(history_frame, text=order_info).pack(anchor='w')
+        else:
+            tk.Label(history_frame, text="Belum ada riwayat pesanan.").pack()
+
+        # Create New Order Button
+        tk.Button(self.root, text="Buat Pesanan Baru", command=lambda: self.hal_buat_pesanan_baru(user)).pack(pady=10)
+
+        # Logout Button
+        tk.Button(self.root, text="Logout", command=self.hal_utama).pack(pady=5)
+
+    def hal_buat_pesanan_baru(self, user):
+        """Membuat antarmuka untuk membuat pesanan baru."""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        tk.Label(self.root, text=f"Buat Pesanan Baru - {user.nama}", font=("Arial", 16)).pack(pady=10)
+
+        tk.Label(self.root, text="Nomor Meja: ").pack(pady=5)
+        self.masukan_meja = tk.Entry(self.root)
+        self.masukan_meja.pack(pady=5)
+
+        tk.Label(self.root, text="Pilih Item Menu: ").pack(pady=5)
+        self.daftar_menu = tk.Listbox(self.root, selectmode=tk.MULTIPLE)
+        for item_id, item in Item.menu.items():
+            self.daftar_menu.insert(tk.END, f"{item_id}. {item.nama} - Rp {item.harga:,.2f}")
+        self.daftar_menu.pack(pady=20)
+
+        tk.Label(self.root, text="Jumlah untuk masing-masing item (pisahkan dengan koma): ").pack(pady=5)
+        self.masukan_qty = tk.Entry(self.root)
+        self.masukan_qty.pack(pady=5)
+
+        tk.Button(self.root, text="Tambahkan Pesanan", command=lambda: self.buat_pesanan(user)).pack(pady=10)
+        tk.Button(self.root, text="Kembali", command=lambda: self.hal_beranda_user(user)).pack(pady=5)
+
+    def buat_pesanan(self, user):
+        """Menambahkan pesanan baru berdasarkan input dari pengguna."""
+        meja = self.masukan_meja.get()
+        item_terpilih = self.daftar_menu.curselection()
+        qty = self.masukan_qty.get()
+
+        # Validasi Nomor Meja
+        if not (meja.isdigit() and 0 <= int(meja) <= 99):
+            messagebox.showwarning("Input Error", "Nomor meja harus berupa angka antara 0 hingga 99!")
+            return
+        meja = int(meja)
+
+        # Validasi Item dan Jumlah
+        if not item_terpilih:
+            messagebox.showwarning("Input Error", "Silakan pilih setidaknya satu item dari menu!")
+            return
+        
+        daftar_qty = qty.split(",")
+        if len(daftar_qty) != len(item_terpilih):
+            messagebox.showwarning("Input Error", "Jumlah item yang dipilih dan jumlah yang dimasukkan tidak sesuai!")
+            return
+        
+        try:
+            daftar_qty = [int(qty.strip()) for qty in daftar_qty]
+        except ValueError:
+            messagebox.showwarning("Input Error", "Jumlah harus berupa angka dan dipisahkan dengan koma!")
+            return
+        
+        # Membuat pesanan baru
+        new_order = Order(meja, user)
+        for idx, item_index in enumerate(item_terpilih):
+            item_id = list(Item.menu.keys())[item_index]
+            item = Item.menu[item_id]
+            qty = daftar_qty[idx]
+            new_order.tambah_item(item, qty)
+
+        messagebox.showinfo("Berhasil", f"Pesanan berhasil dibuat dengan ID: {new_order.ID}")
+        self.hal_beranda_user(user)
+
+    def hal_masuk_koki(self):
         messagebox.showinfo("Koki", "Antarmuka koki sedang dibuat...")
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = FoodOrderApp(root)
+    app = Interface(root)
     root.mainloop()
