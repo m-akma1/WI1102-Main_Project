@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import messagebox
 import enum     # Modul Enumerasi, digunakan untuk membuat alias untuk mempermudah pengkategorian status pesanan
 import datetime # Modul Tanggal dan Waktu, digunakan untuk mendapatkan data waktu dari komputer dalam membuat ID
-import re       # Modul regex untuk validasi input
 
 class Item:
     """
@@ -16,11 +15,13 @@ class Item:
     Argumen initialisasi: `(nama: str, harga: int) -> Item`
     """
     counter = 0 # Jumlah item yang telah dibuat
+    menu = {} # Dictionary untuk menyimpan menu
     def __init__(self, nama: str, harga: int):
         Item.counter += 1
         self.nama = nama
         self.harga = harga
         self.ID = Item.counter
+        Item.menu[self.ID] = self
     
     def __str__(self):
         return f"#{self.ID:02d} | {self.nama:<15} | Rp {self.harga:10,.2f}"
@@ -45,13 +46,13 @@ class User:
     Argumen initialisasi: `(nama: str, telp: str) -> User`
     """
     counter = 0 # Jumlah user yang telah dibuat
-    users = []  # Daftar untuk menyimpan semua pengguna
+    users = {}  # Dictionary untuk menyimpan semua pengguna
     def __init__(self, nama: str, telp: str):
         User.counter += 1
         self.nama = nama
         self.telp = telp
         self.ID = self.id_generator()
-        User.users.append(self)
+        User.users[self.ID] = self
     
     def id_generator(self):
         """Membuat ID unik untuk setiap pengguna."""
@@ -73,12 +74,14 @@ class Order:
     Argumen initialisasi: `(meja: int, user: User) -> Order`
     """
     counter = 0 # Jumlah order yang telah dibuat
+    history = [] # Daftar semua order yang telah dibuat
     def __init__(self, meja: int, user: "User"):
         self.meja = meja
         self.user = user
         self.items = []
         self.status = Status.PENDING
         self.ID = self.id_generator()
+        Order.history.append(self)
 
     def id_generator(self):
         """
@@ -135,10 +138,6 @@ class Order:
         except:
             print("Item tidak ditemukan.")
         
-    def edit_status(self, status):
-        """Mengubah status pesanan."""
-        self.status = status
-    
     def cetak_struk(self):
         """Membuat string untuk mencetak struk pesanan."""
         output = "~" * 67 + "\n"
@@ -165,6 +164,7 @@ class Order:
         return output
     
 # Daftar Menu
+# I think we don't need to create the array anymore since it already exist in the class level method of item
 Menu = [
     Item("Ayam Goreng", 10000),
     Item("Ayam Bakar", 12000),
@@ -207,17 +207,13 @@ class FoodOrderApp:
         
         tk.Label(self.root, text="Nama: ").pack(pady=5)
         self.nama_entry = tk.Entry(self.root)
-        self.nama_entry.pack(pady=5)
+        self.nama_entry.pack(pady=10)
 
-        tk.Label(self.root, text="Nomor Telepon: ").pack(pady=5)
+        tk.Label(self.root, text="Nomor Telepon: \nFormat: 628XXXXXXXX...").pack(pady=5)
         self.telp_entry = tk.Entry(self.root)
-        self.telp_entry.pack(pady=5)
+        self.telp_entry.pack(pady=10)
 
-        tk.Label(self.root, text="Nomor Meja: ").pack(pady=5)
-        self.meja_entry = tk.Entry(self.root)
-        self.meja_entry.pack(pady=5)
-
-        submit_button = tk.Button(self.root, text="Submit", command=self.create_order)
+        submit_button = tk.Button(self.root, text="Submit", command=self.create_user)
         submit_button.pack(pady=20)
 
         back_button = tk.Button(self.root, text="Kembali", command=self.create_main_interface)
@@ -228,9 +224,13 @@ class FoodOrderApp:
         for widget in self.root.winfo_children():
             widget.destroy()
         
+        tk.Label(self.root, text="Masukkan User ID: ").pack(pady=5)
+        self.login_userID_entry = tk.Entry(self.root)
+        self.login_userID_entry.pack(pady=10)
+
         tk.Label(self.root, text="Masukkan Nomor Telepon: ").pack(pady=5)
         self.login_telp_entry = tk.Entry(self.root)
-        self.login_telp_entry.pack(pady=5)
+        self.login_telp_entry.pack(pady=10)
 
         login_button = tk.Button(self.root, text="Login", command=self.login_user)
         login_button.pack(pady=20)
@@ -238,51 +238,45 @@ class FoodOrderApp:
         back_button = tk.Button(self.root, text="Kembali", command=self.create_main_interface)
         back_button.pack(pady=5)
 
-    def create_order(self):
+    def create_user(self):
         """Membuat order baru berdasarkan input dari pengguna"""
         nama = self.nama_entry.get()
         telp = self.telp_entry.get()
-        meja = self.meja_entry.get()
 
         # Validasi Nama
-        if not re.match("^[A-Za-z ]+$", nama):
+        nama = nama.strip()
+        if not (nama.replace(" ", "").isalpha()):
             messagebox.showwarning("Input Error", "Nama hanya boleh mengandung huruf dan spasi!")
             return
         
         # Validasi Nomor Telepon
-        if not re.match("^628\d{8,12}$", telp):
+        if not (telp.startswith("628") and telp[3:].isdigit() and 8 <= len(telp[3:]) <= 12):
             messagebox.showwarning("Input Error", "Nomor telepon harus dalam format 628XXXXXXXXX!")
             return
         
-        # Validasi Nomor Meja
-        if not (meja.isdigit() and 0 <= int(meja) <= 99):
-            messagebox.showwarning("Input Error", "Nomor meja harus berupa angka antara 0 hingga 99!")
-            return
-
-        meja = int(meja)
         user = User(nama, telp)
-        new_order = Order(meja, user)
-        messagebox.showinfo("Berhasil", f"Order berhasil dibuat dengan ID: {new_order.ID}")
+        messagebox.showinfo("Berhasil", f"User berhasil dibuat dengan ID: {user.ID}")
         self.create_main_interface()
 
     def login_user(self):
         """Fungsi untuk login pengguna yang sudah ada"""
+        userID = self.login_userID_entry.get()
         telp = self.login_telp_entry.get()
-        if not telp:
-            messagebox.showwarning("Input Error", "Nomor Telepon harus diisi!")
+
+        if not (userID and telp):
+            messagebox.showwarning("Input Error", "Semua bidang harus diisi!")
             return
         
-        user_found = None
-        for user in User.users:
-            if user.telp == telp:
-                user_found = user
-                break
-        
-        if user_found:
-            messagebox.showinfo("Login Berhasil", f"Selamat datang kembali, {user_found.nama}!")
-            self.create_main_interface()
-        else:
+        user_found = User.users.get()
+        if not user_found:
             messagebox.showerror("Login Gagal", "Pengguna tidak ditemukan!")
+        else:
+            user_telp = user_found.telp            
+            if user_telp == telp:
+                messagebox.showinfo("Login Berhasil", f"Selamat datang kembali, {user_found.nama}!")
+                self.create_main_interface()
+            else:
+                messagebox.showerror("Login Gagal", "Nomor telepon tidak sesuai User ID!")
 
     def chef_interface(self):
         messagebox.showinfo("Koki", "Antarmuka koki sedang dibuat...")
