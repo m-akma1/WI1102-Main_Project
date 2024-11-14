@@ -32,6 +32,7 @@ Sebisa mungkin, kami menerapkan typehinting pada setiap parameter sesuai syntax 
 
 import enum     # Modul Enumerasi, digunakan untuk membuat alias untuk mempermudah pengkategorian status pesanan
 import datetime # Modul Tanggal dan Waktu, digunakan untuk mendapatkan data waktu dari komputer dalam membuat ID
+import time     # Modul waktu untuk menunda tiap output agar tampilan lebih cantik
 
 class Item:
     """
@@ -98,7 +99,8 @@ Menu = [
 def lihat_menu():
     """Menampilkan **langsung** daftar menu makanan dan minuman."""
     # Output adalah variabel string sebagai kontainer sementara hingga f-string selesai diprint
-    output = f"^" * 38 + "\n"
+    output = "\n"
+    output += f"^" * 38 + "\n"
     output += "{}\n".format("Menu Makanan dan Minuman".center(38, "-"))
     output += f" {'ID'} | {'Item':^15} | {'Harga':^15}\n"
     output += f"-" * 38 + "\n"
@@ -162,10 +164,11 @@ class Order:
         Menambahkan item ke dalam pesanan jika belum ada.
         Jika sudah ada, tambahkan jumlahnya.
         """
-        if item in self.items:
-            self.items[self.items.index(item)][1] += qty
-        else :
-            self.items.append([item, qty])
+        for row in self.items:
+            if row[0] == item:
+                row[1] += qty
+                return
+        self.items.append([item, qty])
     
     def edit_item(self, item: "Item", qty: int):
         """Mengedit jumlah item dalam pesanan jika ada."""
@@ -280,8 +283,8 @@ class User:
 
     def __str__(self):
         output = f"User ID: {self.ID}\n"
-        output += f"   Nama: {self.nama}\n"
-        output += f"   Telepon: {self.telp}\n"
+        output += f"Nama: {self.nama}\n"
+        output += f"Telepon: {self.telp}\n"
         return output
     
 class Admin:
@@ -305,7 +308,7 @@ class Admin:
         if username == self._username:
             if password == self._password:
                 self.auth = True
-                print("Login berhasil.")
+                print("Login berhasil!")
                 return True
             else:
                 print("Password salah.")
@@ -327,6 +330,9 @@ class Admin:
         if not self.auth:
             print("Anda harus login terlebih dahulu.")
             return
+        if not order_queue:
+            print("Antrean kosong\n")
+            return
         for urutan, order in enumerate(order_queue, start=1):
             print(f"{urutan}. {order}")         
         
@@ -336,7 +342,7 @@ class Admin:
             print("Anda harus login terlebih dahulu.")
             return
         if not order_queue:
-            print("Antrean kosong.")
+            print("Antrean kosong\n")
             return
         order: Order = order_queue.pop(0)
         order.edit_status(Status.IN_PROGRESS)
@@ -380,202 +386,253 @@ class Interface:
     def header_halaman(self, pesan: str):
         """Membuat header pada halalamn"""
         print("\n" + f"#{'=' * 100}#")
-        print(f"{pesan.center(100, "-")}" + "\n")
+        time.sleep(0.5)
+        print(f"{pesan.center(100, "-")}")
+        time.sleep(0.5)
+        print(f"#{'=' * 100}#" + "\n")
+        time.sleep(0.5)
+
+    def valid(self):
+        """Validasi masukan berupa Pertanyaan Ya/Tidak"""
+        while True:
+            masukan =input("(Y/T) > ")
+            if masukan == "Y" or masukan == "y":
+                return True
+            elif masukan == "T" or masukan == "t":
+                return False
+            else:
+                print("Masukan tidak dikenal.\n")
 
     def keluar(self):
         """Konfirmasi untuk keluar Program"""
         self.header_halaman("KELUAR")
-        print("Apakah anda yakin ingin keluar? (Y/N)")
-        while True:
-            keluar = input("> ")
-            if keluar == "Y":
-                print("Terima kasih telah menggunakan sistem kami.")
-                exit()
-                return
-            elif keluar == "N":
-                return
-            else:
-                print("Input tidak dikenal.")
+        print("Apakah Anda yakin ingin keluar dari aplikasi?", end = " ")
+        if self.valid():
+            exit()
+            return
+        else:
+            return
+                
 
     def halaman_utama(self):
         """Halaman utama dan pertama ketika memulai program"""
         while True:
             self.header_halaman("HALAMAN UTAMA")
             print(f"Pilih peran:")
+            time.sleep(0.5)
             print("1. Koki")
+            time.sleep(0.5)
             print("2. Pengguna")
+            time.sleep(0.5)
             print("X. Keluar")
+            time.sleep(0.5)
             peran = input("> ")
             if peran == "1":
                 self.login_koki()
             elif peran == "2":
                 self.login_pengguna()
-            elif peran == "X":
+            elif peran == "X" or peran == "x":
                 self.keluar()
             else:
-                print("Input tidak dikenal.")
+                print("Masukan tidak dikenal.\n")
+                time.sleep(0.5)
     
     def login_koki(self):
         """Portal koki login"""
         self.header_halaman("LOGIN KOKI")
         while True:
-            username = input("Username: ")
-            password = input("Password: ")
+            time.sleep(0.5)
+            username = input("Username: > ")
+            password = input("Password: > ")
             if Interface.admin.login(username, password):
                 self.menu_koki()
                 break
             else:
-                print("Login gagal. Coba lagi? (Y/N)")
-                if input("> ") == "N":
-                    break
+                print("Login gagal. Coba lagi?", end = " ")
+                if not self.valid():
+                    return
 
     def menu_koki(self):
         """"Dashboard beranda bagi koki"""
         self.header_halaman("MENU KOKI")
         while True:
+            time.sleep(0.5)
             print("A. Lihat Antrean")
+            time.sleep(0.5)
             print("B. Proses Pesanan")
+            time.sleep(0.5)
             print("X. Logout")
+            time.sleep(0.5)
             pilihan = input("> ")
-            if pilihan == "A":
+            if pilihan == "A" or pilihan == "a":
                 self.header_halaman("DAFTAR ANTREAN")
                 Interface.admin.lihat_antrean()
-            elif pilihan == "B":
+            elif pilihan == "B"or pilihan == "b":
                 self.header_halaman("PROSES PESANAN")
-                print("Anda akan memproses pesanan terdepan. Lanjutkan? (Y/N)")
-                if input("> ") == "Y":
+                time.sleep(0.5)
+                print("Anda akan memproses pesanan terdepan. Lanjutkan?", end = " ")
+                if self.valid():
                     Interface.admin.proses_order()
-            elif pilihan == "X":
-                print("Anda akan logout dan kembali ke halaman utama. Lanjutkan? (Y/N)")
-                if input("> ") == "Y":
+            elif pilihan == "X" or pilihan == "x":
+                print("Anda akan logout dan kembali ke halaman utama. Lanjutkan?", end = " ")
+                if self.valid():
                     self.admin.logout()
                     break
-                break
             else:
-                print("Input tidak dikenal.")
+                print("Masukan tidak dikenal.\n")
     
     def login_pengguna(self):
         """Memisahkan pengguna yang sudah/belum punya User ID"""
         self.header_halaman("LOGIN PENGGUNA")
-        print("Apakah Anda sudah memiliki User ID? (Y/N)")
-        while True:
-            jawab = input("> ")
-            if jawab == "Y":
-                self.login_userID()
-                break
-            elif jawab == "N":
-                self.daftar_user()
-                break
-            else:
-                print("Input tidak dikenal.")
+        print("Apakah Anda sudah memiliki User ID?", end = " ")
+        if self.valid():
+            self.login_userID()
+        else:
+            self.daftar_user()
     
     def login_userID(self):
         """Portal login dengan User ID"""
         self.header_halaman("LOGIN PENGGUNA DENGAN USER ID")
         while True:
-            user_id = input("Masukkan User ID: ")
+            user_id = input("Masukkan User ID: > ")
             user = Interface.users.get(user_id)
             if user:
                 self.menu_pengguna(user)
                 break
             else:
-                print("User ID tidak ditemukan. Coba lagi? (Y/N)")
-                if input("> ") == "N":
+                print("User ID tidak ditemukan. Coba lagi?", end = " ")
+                if not self.valid():
                     break
             
     def daftar_user(self):
         """Membuat user baru dan login otomatis"""
         self.header_halaman("DAFTAR PENGUNA BARU")
+        print("Masukkan nama dan nomor telepon Anda!")
+        time.sleep(0.5)
+        print("Keterangan: masukkan nomor telelpon dengan diawali 62 atau kode negara Anda. \nContoh: 628123456789\n")
+        time.sleep(0.5)
         while True:
-            nama = input("Nama: ")
-            telp = input("No. Telepon: ")
-            print("Apakah data yang dimasukkan di atas sudah benar? (Y/N)")
-            if input("> ") == "Y":
+            nama = input("Nama: > ").strip()
+            if not nama.replace(" ", "").isalpha():
+                print("Nama hanya boleh berisi huruf dan/atau spasi!\n")
+                time.sleep(0.5)
+                continue
+            telp = input("No. Telepon: > ").strip()
+            if not telp.isnumeric():
+                print("Telepon hanya boleh berisi angka!\n")
+                time.sleep(0.5)
+                continue
+            print("Apakah data yang dimasukkan di atas sudah benar?", end = " ")
+            if self.valid():
                 user = User(nama, telp)
                 Interface.users[user.ID] = user
+                print("User berhasil dibuat!")
+                time.sleep(0.5)
                 print(f"User ID Anda adalah: {user.ID}")
+                time.sleep(0.5)
                 self.menu_pengguna(user)
                 break
             else:
-                print("Silahkan masukkan data kembali.")
+                print("Silahkan masukkan data kembali.\n")
+                time.sleep(0.5)
 
     def menu_pengguna(self, user: User):
         """Dasborad beranda bagi pengguna"""
         self.header_halaman("MENU PENGGUNA")
         print(user)
-        print(f"Selamat datang, {user.nama}!")
+        print(f"Selamat datang, {user.nama}!\n")
+        time.sleep(0.5)
         while True:
             print("A. Buat Pesanan Baru")
+            time.sleep(0.5)
             print("B. Lihat Daftar Pesanan")
+            time.sleep(0.5)
             print("X. Logout")
+            time.sleep(0.5)
             pilihan = input("> ")
-            if pilihan == "A":
+            if pilihan == "A" or pilihan == "a":
                 self.buat_pesanan(user)
-            elif pilihan == "B":
+            elif pilihan == "B"or pilihan == "b":
                 self.pesanan_pengguna(user)
-            elif pilihan == "X":
-                print("Anda akan logout dan kembali ke halaman utama. Lanjutkan? (Y/N)")
-                if input("> ") == "Y":
+            elif pilihan == "X" or pilihan == "x":
+                print("Anda akan logout dan kembali ke halaman utama. Lanjutkan?", end = " ")
+                if self.valid():
                     break
             else:
-                print("Input tidak dikenal.")
+                print("Masukan tidak dikenal.")
+                time.sleep(0.5)
     
     def buat_pesanan(self, user: User):
         """Antarmuka membuat pesanann baru"""
         self.header_halaman("BUAT PESANAN BARU")
-
-        # Pilih Meja
         while True:
             try: 
                 meja = int(input("Masukkan Nomor Meja: "))
-                print("Apakah nomor meja sudah benar? (Y/N)")
-                if input("> ") == "Y":
+                print("Apakah nomor meja sudah benar?", end = " ")
+                if self.valid():
                     break
             except:
-                print("Input tidak valid.")
+                print("Masukan tidak valid.")
+                time.sleep(0.5)
                 continue
-        print(f"Meja {meja} dipilih")
         order = Order(meja, user)
-
-        # Pilih Menu
+        print(f"Pesanan untuk meja {meja} a.n. {user.nama} dibuat.")
+        time.sleep(0.5)
         lihat_menu()
+        time.sleep(0.5)
         print("Masukkan ID menu yang ingin dipesan dan jumlahnya.")
+        time.sleep(0.5)
         while True:
-            item_id = input("ID Menu: ")
-            item = Menu[int(item_id)-1]
-            qty = int(input("Jumlah: "))
-            print(f"{item} | {qty} porsi")
-            print("Konfirmasi Item? (Y/N)")
-            if input("> ") == "Y":
+            try:
+                item_id = input("ID Menu: > ")
+                item = Menu[int(item_id)-1]
+                qty = int(input("Jumlah: > "))
+                if not (qty > 0):
+                    print("Jumlah harus berupa bilangan positif")
+                    time.sleep(0.5)
+                    continue
+            except:
+                print("Masukan tidak valid.")
+                time.sleep(0.5)
+                continue
+            print(f"Anda memilih: {item} | {qty} porsi")
+            time.sleep(0.5)
+            print("Konfirmasi Item?", end = " ")
+            if self.valid():
                 order.tambah_item(item, qty)
                 print("Item berhasil ditambahkan.")
-                print("Pesan lagi? (Y/N)")
-                if input("> ") == "N":
-                    break
-            elif input("> ") == "N":
-                print("Silahkan masukkan pesanan kembali.")
-            else:
-                print("Input tidak dikenal.")
-        
-        # Konfirmasi Pesanan
-        print("Pesanan Anda:")
+                time.sleep(0.5)
+                print("Pesan lagi?", end = " ")
+                if self.valid():
+                    continue
+                else:
+                    break        
+        print(f"\n{"REVIEW PESANAN":^67}")
+        time.sleep(0.5)
         print(order.cetak_struk())
+        time.sleep(0.5)
         print("Konfirmasi Pesanan?")
+        time.sleep(0.5)
         print("Pesanan yang telah dikonfirmasi tidak bisa dibatalkan dan akan dikenakan biaya total.")
-        print("Ketik 'SAYA SETUJU' untuk konfirmasi.")
-        if input("> ") == "SAYA SETUJU":
+        time.sleep(0.5)
+        if self.valid():
             user.tambah_order(order)
-            print("Pesanan berhasil dikonfirmasi.")
+            print("Pesanan berhasil dikonfirmasi!")
+            time.sleep(0.5)
         else:
             print("Pesanan dibatalkan.")
-            print("Anda kembali ke menu pengguna.")
+            time.sleep(0.5)
+        print("\nAnda kembali ke menu pengguna.")
+        time.sleep(0.5)
 
     def pesanan_pengguna(self, user: User):
         """Antarmuka daftar pesanan pengguna"""
         self.header_halaman("DAFTAR PESANAN")
         print(user.lihat_daftar())
-        print("Apakah Anda ingin melihat detail pesanan? (Y/N)")
-        if input("> ") == "Y":
+        time.sleep(0.5)
+        print("Apakah Anda ingin melihat detail pesanan?", end = " ")
+        time.sleep(0.5)
+        if self.valid():
             while True:
                 order_id = input("Masukkan ID Pesanan: ")
                 order: Order = user.orders.get(order_id)
@@ -586,9 +643,20 @@ class Interface:
                     print("Pesanan tidak ditemukan. Coba lagi? (Y/N)")
                     if input("> ") == "N":
                         break
-        print("Kembali ke menu pengguna? (Y/N)")
-        if input("> ") == "Y":
+        time.sleep(0.5)
+        print("Kembali ke menu pengguna?", end = " ")
+        if self.valid():
             return
+        else:
+            self.pesanan_pengguna()
 
 ### MAIN PROGRAM ###
+print("")
+print("~"*100)
+time.sleep(0.5)
+print("PANDA MANIS".center(100))
+time.sleep(1)
+print("kaPAN DApat MAkanan gratISnya?".center(100))
+print("~"*100)
+time.sleep(1)
 Interface().halaman_utama()
