@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import enum     # Modul Enumerasi, digunakan untuk membuat alias untuk mempermudah pengkategorian status pesanan
 import datetime # Modul Tanggal dan Waktu, digunakan untuk mendapatkan data waktu dari komputer dalam membuat ID
+import re       # Modul regex untuk validasi input
 
 class Item:
     """
@@ -31,6 +32,31 @@ class Status(enum.Enum):
     IN_PROGRESS = "Dalam proses"
     READY = "Siap diambil"
     COMPLETED = "Selesai"
+
+class User:
+    """
+    Representasi pengguna (customer).
+    
+    Atribut:
+    - ID User: `ID: str`
+    - Nama: `nama: str`
+    - Nomor Telepon: `telp: str`
+
+    Argumen initialisasi: `(nama: str, telp: str) -> User`
+    """
+    counter = 0 # Jumlah user yang telah dibuat
+    users = []  # Daftar untuk menyimpan semua pengguna
+    def __init__(self, nama: str, telp: str):
+        User.counter += 1
+        self.nama = nama
+        self.telp = telp
+        self.ID = self.id_generator()
+        User.users.append(self)
+    
+    def id_generator(self):
+        """Membuat ID unik untuk setiap pengguna."""
+        initial = self.nama[:3].upper()
+        return f"U-{User.counter:03d}-{initial}"
 
 class Order:
     """
@@ -149,27 +175,114 @@ Menu = [
 
 # GUI Setup using tkinter
 class FoodOrderApp:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, root: tk.Tk):
+        self.root: tk.Tk = root
         self.root.title("Food Ordering System")
-        self.root.geometry("500x300")
+        self.root.geometry("500x400")
         self.root.resizable(False, False)
         
         self.create_main_interface()
 
     def create_main_interface(self):
         """Membuat antarmuka utama untuk memilih sebagai pengguna atau koki"""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
         self.header = tk.Label(self.root, text="Selamat Datang di Panda Manis", font=("Arial", 18))
         self.header.pack(pady=20)
 
-        self.user_button = tk.Button(self.root, text="Pengguna", width=15, height=2, command=self.user_interface)
+        self.user_button = tk.Button(self.root, text="Pengguna Baru", width=15, height=2, command=self.new_user_interface)
         self.user_button.pack(pady=10)
+        
+        self.login_button = tk.Button(self.root, text="Login Pengguna", width=15, height=2, command=self.login_user_interface)
+        self.login_button.pack(pady=10)
         
         self.chef_button = tk.Button(self.root, text="Koki", width=15, height=2, command=self.chef_interface)
         self.chef_button.pack(pady=10)
 
-    def user_interface(self):
-        messagebox.showinfo("Pengguna", "Antarmuka pengguna sedang dibuat...")
+    def new_user_interface(self):
+        """Membuat antarmuka untuk pengguna baru untuk melakukan pemesanan"""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        tk.Label(self.root, text="Nama: ").pack(pady=5)
+        self.nama_entry = tk.Entry(self.root)
+        self.nama_entry.pack(pady=5)
+
+        tk.Label(self.root, text="Nomor Telepon: ").pack(pady=5)
+        self.telp_entry = tk.Entry(self.root)
+        self.telp_entry.pack(pady=5)
+
+        tk.Label(self.root, text="Nomor Meja: ").pack(pady=5)
+        self.meja_entry = tk.Entry(self.root)
+        self.meja_entry.pack(pady=5)
+
+        submit_button = tk.Button(self.root, text="Submit", command=self.create_order)
+        submit_button.pack(pady=20)
+
+        back_button = tk.Button(self.root, text="Kembali", command=self.create_main_interface)
+        back_button.pack(pady=5)
+
+    def login_user_interface(self):
+        """Membuat antarmuka untuk pengguna yang sudah ada untuk login"""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        tk.Label(self.root, text="Masukkan Nomor Telepon: ").pack(pady=5)
+        self.login_telp_entry = tk.Entry(self.root)
+        self.login_telp_entry.pack(pady=5)
+
+        login_button = tk.Button(self.root, text="Login", command=self.login_user)
+        login_button.pack(pady=20)
+
+        back_button = tk.Button(self.root, text="Kembali", command=self.create_main_interface)
+        back_button.pack(pady=5)
+
+    def create_order(self):
+        """Membuat order baru berdasarkan input dari pengguna"""
+        nama = self.nama_entry.get()
+        telp = self.telp_entry.get()
+        meja = self.meja_entry.get()
+
+        # Validasi Nama
+        if not re.match("^[A-Za-z ]+$", nama):
+            messagebox.showwarning("Input Error", "Nama hanya boleh mengandung huruf dan spasi!")
+            return
+        
+        # Validasi Nomor Telepon
+        if not re.match("^628\d{8,12}$", telp):
+            messagebox.showwarning("Input Error", "Nomor telepon harus dalam format 628XXXXXXXXX!")
+            return
+        
+        # Validasi Nomor Meja
+        if not (meja.isdigit() and 0 <= int(meja) <= 99):
+            messagebox.showwarning("Input Error", "Nomor meja harus berupa angka antara 0 hingga 99!")
+            return
+
+        meja = int(meja)
+        user = User(nama, telp)
+        new_order = Order(meja, user)
+        messagebox.showinfo("Berhasil", f"Order berhasil dibuat dengan ID: {new_order.ID}")
+        self.create_main_interface()
+
+    def login_user(self):
+        """Fungsi untuk login pengguna yang sudah ada"""
+        telp = self.login_telp_entry.get()
+        if not telp:
+            messagebox.showwarning("Input Error", "Nomor Telepon harus diisi!")
+            return
+        
+        user_found = None
+        for user in User.users:
+            if user.telp == telp:
+                user_found = user
+                break
+        
+        if user_found:
+            messagebox.showinfo("Login Berhasil", f"Selamat datang kembali, {user_found.nama}!")
+            self.create_main_interface()
+        else:
+            messagebox.showerror("Login Gagal", "Pengguna tidak ditemukan!")
 
     def chef_interface(self):
         messagebox.showinfo("Koki", "Antarmuka koki sedang dibuat...")
