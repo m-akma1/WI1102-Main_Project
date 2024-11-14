@@ -246,11 +246,10 @@ class Interface:
 
     def buat_user_baru(self):
         """Membuat order baru berdasarkan input dari pengguna"""
-        nama = self.masukan_nama.get()
-        telp = self.masukan_telp.get()
+        nama = self.masukan_nama.get().strip()
+        telp = self.masukan_telp.get().strip()
 
         # Validasi Nama
-        nama = nama.strip()
         if not (nama.replace(" ", "").isalpha()):
             messagebox.showwarning("Input Error", "Nama hanya boleh mengandung huruf dan spasi!")
             return
@@ -277,8 +276,7 @@ class Interface:
         if not user_ditemukan:
             messagebox.showerror("Login Gagal", "Pengguna tidak ditemukan!")
         else:
-            user_telp = user_ditemukan.telp            
-            if user_telp == telp:
+            if user_ditemukan.telp == telp:
                 messagebox.showinfo("Login Berhasil", f"Selamat datang kembali, {user_ditemukan.nama}!")
                 self.hal_beranda_user(user_ditemukan)
             else:
@@ -293,16 +291,16 @@ class Interface:
 
         # Order History
         tk.Label(self.root, text="Riwayat Pesanan:", font=("Arial", 14)).pack(pady=5)
-        history_frame = tk.Frame(self.root)
-        history_frame.pack(pady=5)
+        frame_riwayat_pesanan = tk.Frame(self.root)
+        frame_riwayat_pesanan.pack(pady=5)
         
         orders = [order for order in Order.history if order.user == user]
         if orders:
             for order in orders:
-                order_info = f"ID: {order.ID} | Meja: {order.meja} | Status: {order.status.value} | Total: Rp {order.cek_total():,.2f}"
-                tk.Label(history_frame, text=order_info).pack(anchor='w')
+                info_order = f"ID: {order.ID} | Meja: {order.meja} | Status: {order.status.value} | Total: Rp {order.cek_total():,.2f}"
+                tk.Label(frame_riwayat_pesanan, text=info_order).pack(anchor='w')
         else:
-            tk.Label(history_frame, text="Belum ada riwayat pesanan.").pack()
+            tk.Label(frame_riwayat_pesanan, text="Belum ada riwayat pesanan.").pack()
 
         # Create New Order Button
         tk.Button(self.root, text="Buat Pesanan Baru", command=lambda: self.hal_buat_pesanan_baru(user)).pack(pady=10)
@@ -322,23 +320,21 @@ class Interface:
         self.masukan_meja.pack(pady=5)
 
         tk.Label(self.root, text="Pilih Item Menu: ").pack(pady=5)
-        self.daftar_menu = tk.Listbox(self.root, selectmode=tk.MULTIPLE)
+        frame_menu = tk.Frame(self.root)
+        frame_menu.pack(pady=5)
+
+        self.entries_qty = {}
         for item_id, item in Item.menu.items():
-            self.daftar_menu.insert(tk.END, f"{item_id}. {item.nama} - Rp {item.harga:,.2f}")
-        self.daftar_menu.pack(pady=20)
-
-        tk.Label(self.root, text="Jumlah untuk masing-masing item (pisahkan dengan koma): ").pack(pady=5)
-        self.masukan_qty = tk.Entry(self.root)
-        self.masukan_qty.pack(pady=5)
-
-        tk.Button(self.root, text="Tambahkan Pesanan", command=lambda: self.buat_pesanan(user)).pack(pady=10)
+            tk.Label(frame_menu, text=f"{item.nama} - Rp {item.harga:,.2f}").grid(row=item_id, column=0, sticky='w', padx=5, pady=2)
+            entry_qty = tk.Entry(frame_menu, width=5)
+            entry_qty.grid(row=item_id, column=1, padx=5, pady=2)
+            self.entries_qty[item] = entry_qty
+        
+        tk.Button(self.root, text="Konfirmasi Pesanan", command=lambda: self.hal_konfirmasi_pesanan(user)).pack(pady=10)
         tk.Button(self.root, text="Kembali", command=lambda: self.hal_beranda_user(user)).pack(pady=5)
 
-    def buat_pesanan(self, user):
-        """Menambahkan pesanan baru berdasarkan input dari pengguna."""
+    def hal_konfirmasi_pesanan(self, user):
         meja = self.masukan_meja.get()
-        item_terpilih = self.daftar_menu.curselection()
-        qty = self.masukan_qty.get()
 
         # Validasi Nomor Meja
         if not (meja.isdigit() and 0 <= int(meja) <= 99):
@@ -346,31 +342,40 @@ class Interface:
             return
         meja = int(meja)
 
-        # Validasi Item dan Jumlah
-        if not item_terpilih:
-            messagebox.showwarning("Input Error", "Silakan pilih setidaknya satu item dari menu!")
+        items_pesanan = []
+        for item, entry in self.entries_qty.items():
+            qty = entry.get()
+            if qty.isdigit() and int(qty) > 0:
+                items_pesanan.append((item, int(qty)))
+        
+        if not items_pesanan:
+            messagebox.showwarning("Input Error", "Silakan masukkan jumlah untuk setidaknya satu item!")
             return
         
-        daftar_qty = qty.split(",")
-        if len(daftar_qty) != len(item_terpilih):
-            messagebox.showwarning("Input Error", "Jumlah item yang dipilih dan jumlah yang dimasukkan tidak sesuai!")
-            return
-        
-        try:
-            daftar_qty = [int(qty.strip()) for qty in daftar_qty]
-        except ValueError:
-            messagebox.showwarning("Input Error", "Jumlah harus berupa angka dan dipisahkan dengan koma!")
-            return
-        
-        # Membuat pesanan baru
-        new_order = Order(meja, user)
-        for idx, item_index in enumerate(item_terpilih):
-            item_id = list(Item.menu.keys())[item_index]
-            item = Item.menu[item_id]
-            qty = daftar_qty[idx]
-            new_order.tambah_item(item, qty)
+        for widget in self.root.winfo_children():
+            widget.destroy()
 
-        messagebox.showinfo("Berhasil", f"Pesanan berhasil dibuat dengan ID: {new_order.ID}")
+        tk.Label(self.root, text=f"Konfirmasi Pesanan - {user.nama}", font=("Arial", 16)).pack(pady=10)
+        tk.Label(self.root, text=f"Nomor Meja: {meja}").pack(pady=5)
+        
+        frame_konfirmasi = tk.Frame(self.root)
+        frame_konfirmasi.pack(pady=5)
+        
+        total_harga = 0
+        for idx, (item, qty) in enumerate(items_pesanan, start=1):
+            subtotal = item.harga * qty
+            total_harga += subtotal
+            tk.Label(frame_konfirmasi, text=f"{idx}. {item.nama} - Qty: {qty} - Subtotal: Rp {subtotal:,.2f}").pack(anchor='w')
+        tk.Label(self.root, text=f"Total Harga: Rp {total_harga:,.2f}", font=("Arial", 14)).pack(pady=10)
+        
+        tk.Button(self.root, text="Buat Pesanan", command=lambda: self.buat_pesanan(user, meja, items_pesanan)).pack(pady=10)
+        tk.Button(self.root, text="Kembali", command=lambda: self.hal_buat_pesanan_baru(user)).pack(pady=5)
+
+    def buat_pesanan(self, user, meja, items_pesanan):
+        pesanan_baru = Order(meja, user)
+        for item, qty in items_pesanan:
+            pesanan_baru.tambah_item(item, qty)
+        messagebox.showinfo("Berhasil", f"Pesanan berhasil dibuat dengan ID: {pesanan_baru.ID}")
         self.hal_beranda_user(user)
 
     def hal_masuk_koki(self):
