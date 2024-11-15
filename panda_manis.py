@@ -261,7 +261,7 @@ class Interface:
         
         user = User(nama, telp)
         messagebox.showinfo("Berhasil", f"User berhasil dibuat dengan ID: {user.ID}")
-        self.hal_utama()
+        self.hal_beranda_user(user)
 
     def masuk_user(self):
         """Fungsi untuk login pengguna yang sudah ada"""
@@ -287,26 +287,29 @@ class Interface:
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        tk.Label(self.root, text=f"Beranda Pengguna - {user.nama}", font=("Arial", 16)).pack(pady=10)
-
-        # Order History
-        tk.Label(self.root, text="Riwayat Pesanan:", font=("Arial", 14)).pack(pady=5)
-        frame_riwayat_pesanan = tk.Frame(self.root)
-        frame_riwayat_pesanan.pack(pady=5)
+        frame_dashboard = tk.Frame(self.root)
+        frame_dashboard.grid(row=0, column=0, sticky='nsew')
+        frame_dashboard.grid_columnconfigure(0, weight=1)
+        frame_dashboard.grid_columnconfigure(1, weight=1)
+        tk.Label(frame_dashboard, text=f"Dashboard Pengguna - {user.nama}", font=("Arial", 16)).grid(row=0, column=0, columnspan=4, pady=10)
+        tk.Label(frame_dashboard, text="Riwayat Pesanan:", font=("Arial", 14)).grid(row=1, column=0, columnspan=4, pady=5)
         
         orders = [order for order in Order.history if order.user == user]
         if orders:
-            for order in orders:
-                info_order = f"ID: {order.ID} | Meja: {order.meja} | Status: {order.status.value} | Total: Rp {order.cek_total():,.2f}"
-                tk.Label(frame_riwayat_pesanan, text=info_order).pack(anchor='w')
+            tk.Label(frame_dashboard, text="Order ID", font=("Arial", 12)).grid(row=2, column=0, padx=5, pady=5, sticky='w')
+            tk.Label(frame_dashboard, text="Meja", font=("Arial", 12)).grid(row=2, column=1, padx=5, pady=5, sticky='w')
+            tk.Label(frame_dashboard, text="Status", font=("Arial", 12)).grid(row=2, column=2, padx=5, pady=5, sticky='w')
+            tk.Label(frame_dashboard, text="Total", font=("Arial", 12)).grid(row=2, column=3, padx=5, pady=5, sticky='w')
+            for idx, order in enumerate(orders, start=3):
+                tk.Label(frame_dashboard, text=f"{order.ID}").grid(row=idx, column=0, padx=5, pady=2, sticky='w')
+                tk.Label(frame_dashboard, text=f"{order.meja}").grid(row=idx, column=1, padx=5, pady=2, sticky='w')
+                tk.Label(frame_dashboard, text=f"{order.status.value}").grid(row=idx, column=2, padx=5, pady=2, sticky='w')
+                tk.Label(frame_dashboard, text=f"Rp {order.cek_total():,.2f}").grid(row=idx, column=3, padx=5, pady=2, sticky='w')
         else:
-            tk.Label(frame_riwayat_pesanan, text="Belum ada riwayat pesanan.").pack()
-
-        # Create New Order Button
-        tk.Button(self.root, text="Buat Pesanan Baru", command=lambda: self.hal_buat_pesanan_baru(user)).pack(pady=10)
-
-        # Logout Button
-        tk.Button(self.root, text="Logout", command=self.hal_utama).pack(pady=5)
+            tk.Label(frame_dashboard, text="Belum ada riwayat pesanan.").grid(row=3, column=0, columnspan=4, pady=5)
+        
+        tk.Button(frame_dashboard, text="Buat Pesanan Baru", command=lambda: self.hal_buat_pesanan_baru(user)).grid(row=len(orders) + 4, column=0, columnspan=2, pady=10)
+        tk.Button(frame_dashboard, text="Logout", command=self.hal_utama).grid(row=len(orders) + 4, column=2, columnspan=2, pady=5)
 
     def hal_buat_pesanan_baru(self, user):
         """Membuat antarmuka untuk membuat pesanan baru."""
