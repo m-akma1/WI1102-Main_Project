@@ -273,7 +273,6 @@ class User:
         Ke depannya jika memungkinkan akan mengirim SMS Notifikasi
         """
         print(f"Pesanan {order.ID} sudah siap diambil, mengirim notifikasi...")
-        time.sleep(1)
         print(f"Notifikasi berhasil dikirim ke +{self.telp} dengan kode {order.ID[-3:]}")
         order.status = Status.COMPLETED
 
