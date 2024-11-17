@@ -1,3 +1,16 @@
+"""
+SISTEM PEMESANAN MAKANAN
+PROJEK 1 MATA KULIAH WI1102 - BERPIKIR KOMPUTASIONAL
+KELAS 31 - KELOMPOK 5:
+1. 19624218 Tiara Clianta Andiwi
+2. 19624235 Muhammad Akmal
+3. 19624250 Ahmad Rinofaros Muchtar
+4. 19624264 Muh. Hartawan Haidir
+5. 19624284 Muthia Ariesta Anggraeni
+
+(c) 2024. Bandung. Sekolah Teknik Elektro dan Informatika. Institut Teknologi Bandung.
+"""
+
 import threading # Impor modul threading untuk menjalankan kedua antarmuka secara bersamaan
 import client.GUI_Interface # Impor modul GUI_Interface dari client
 from client.CLI_Interface import CLI_Interface # Impor kelas CLI_Interface dari client
