@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import messagebox
 from client.user import User
 from server.item import Item
-from server.admin import Admin
 from server.order import Order, Status
 
 class GUI_Interface:

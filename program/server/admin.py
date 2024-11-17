@@ -1,6 +1,5 @@
 from server.order import Order, Status
 from client.user import User
-from client.GUI_Interface import GUI_Interface
 
 class Admin:
     """
