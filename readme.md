@@ -12,7 +12,7 @@ Kelas 31 - Kelompok 5:
 **Kepanjangan:** ka**PAN** **DA**pat **MA**ka**N**an grat**IS**nya?
 
 ### Deskripsi
-Program ini akan mensimulasikan sistem pemesanan makanan yang memungkinkan pengguna untuk memesan makanan mereka dan melihat statusnya selagi diproses. [Program](program\main.py) ini dibagi menjadi dua sisi: [*server*](program\server\__init__.py) dan [*client*](program\client\__init__.py). Sisi server bertanggung jawab dalam menginisasi menu, mengelola antrean pesanan, dan menyelesaikan pesanan. Sisi klien bertanggung jawab untuk membuat antarmuka, mengelola *user*, dan menampilkan status pesanan.
+Program ini akan mensimulasikan sistem pemesanan makanan yang memungkinkan pengguna untuk memesan makanan mereka dan melihat statusnya selagi diproses. [Program](program/main.py) ini dibagi menjadi dua sisi: [*server*](program/server/) dan [*client*](program/client/). Sisi server bertanggung jawab dalam menginisasi menu, mengelola antrean pesanan, dan menyelesaikan pesanan. Sisi klien bertanggung jawab untuk membuat antarmuka, mengelola *user*, dan menampilkan status pesanan.
 
 ### Fitur Utama
 - Registrasi dan Login Pengguna: Pengguna dapat mendaftar sebagai pelanggan baru atau login sebagai pelanggan lama untuk melakukan pemesanan.
