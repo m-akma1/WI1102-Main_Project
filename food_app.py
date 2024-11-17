@@ -20,12 +20,23 @@ Sisi server bertanggung jawab untuk mengelola database menu, antrean pesanan, da
 
 """
 KAMUS
-Sistem penjelasan kamus variabel dilakukan pada setiap definisi untuk memudahkan pembacaan daripada mendefinsikan semua fungsi dan variabel di sini lantaran banyaknya nama yang harus dilacak. 
+Modul yang digunakan:
+- `enum`
+- `datetime`
+- `time`
 
-Kami menerapkan penggunaan docstring untuk setiap definisi kelas agar mempermudak melacak kelas dan memanfaatkan integrasi pada kode editor seperti VS Code. Fungsi dan metode yang diberi komentar/docstring adalah fungsi yang dibuat oleh penulis program. Kami mengasumsikan pembaca program sudah mengetahui fungsi bawaan seperti `__init__` dan `__str__` sehingga tidak perlu menjelaskan lagi.
+Kelas yang didefinisikan:
+- `Item` -> berisi informasi makanan dan minuman yang ada di menu
+- `Status` -> enumerasi status pesanan
+- `Order` -> berisi informasi pesanan yang dibuat oleh pengguna
+- `User` -> berisi informasi pengguna yang memesan
+- `Admin` -> berisi informasi admin yang mengelola pesanan
+- `CLI_Interface` -> berisi antarmuka antara sisi klien dan sisi server
 
-Sebisa mungkin, kami menerapkan typehinting pada setiap parameter sesuai syntax Python, diindikasikan dengan format (nama_variabel: tipe_variabel). Typehinting dilakukan agar Pylance (ekstensi Python di VS Code) dapat mengenali objek dan menyesuaikan metode yang terdapat padanya. Jika tidak ada typehinting, tipe data bisa disimpulkan dari komentar yang ada.
-
+Variabel global:
+- `Menu: list[Item]` -> daftar menu makanan dan minuman yang ada
+- `header: CLI_Interface` -> header awal program
+- `main_program: CLI_Interface` -> antarmuka utama program
 """
 
 # ALGORITMA

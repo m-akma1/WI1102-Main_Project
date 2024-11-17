@@ -1,5 +1,5 @@
-import tkinter as tk
-from tkinter import messagebox
+import tkinter as tk    # Modul Tkinter, digunakan untuk membuat antarmuka pengguna
+from tkinter import messagebox # Modul Tkinter, digunakan untuk membuat pesan pop-up
 import enum     # Modul Enumerasi, digunakan untuk membuat alias untuk mempermudah pengkategorian status pesanan
 import datetime # Modul Tanggal dan Waktu, digunakan untuk mendapatkan data waktu dari komputer dalam membuat ID
 
@@ -226,7 +226,7 @@ class Interface:
     def __init__(self, root: tk.Tk):
         self.root: tk.Tk = root
         self.root.title("Food Ordering System")
-        self.root.geometry("500x400")
+        self.root.geometry("600x600")
         self.root.resizable(True, True)
         
         self.hal_utama()
