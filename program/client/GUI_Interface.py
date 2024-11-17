@@ -104,7 +104,7 @@ class GUI_Interface:
         tk.Label(self.root, text="kaPAN DApat MAkaNan gratISnya?", font=(self.font_family, self.fsize_h1)).pack(pady=5)
 
         # Label Logo Meme
-        self.image = Image.open("program\\client\\logo.jpeg")
+        self.image = Image.open("client\\logo.jpeg")
         self.image = self.image.resize((146, 194), Image.LANCZOS) 
         self.image = ImageTk.PhotoImage(self.image)
         label_image = tk.Label(self.root, image=self.image)
