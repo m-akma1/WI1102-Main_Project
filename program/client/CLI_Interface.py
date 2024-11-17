@@ -1,21 +1,41 @@
-import time
-from client.user import User
-from server.item import Item
-from server.admin import Admin
-from server.order import Order, Status
+import time # Untuk mengatur jeda waktu
+from client.user import User # Import class User dari file user.py
+from server.item import Item # Import class Item dari file item.py
+from server.admin import Admin # Import class Admin dari file admin.py
+from server.order import Order, Status # Import class Order dan Enum Status dari file order.py
 
 class CLI_Interface:
     """
     Antarmuka antara sisi klien dan sisi server dalam bentuk CLI (Command Line Interface).
+
+    Atribut:
+    - admin: `Admin` - Objek admin yang digunakan untuk mengakses data dari sisi server.
+
+    Metode:
+    - `print_dl(text: str, **kwargs)`: Mencetak baris dengan jeda waktu tertentu.
+    - `print_dc(text: str, **kwargs)`: Mencetak karakter dengan jeda waktu tertentu.
+    - `header_halaman(pesan: str)`: Membuat header pada halaman.
+    - `valid() -> bool`: Validasi masukan berupa Pertanyaan Ya/Tidak.
+    - `keluar()`: Konfirmasi untuk keluar Program.
+    - `selamat_datang()`: Menampilkan pesan selamat datang.
+    - `halaman_utama()`: Halaman utama dan pertama ketika memulai program.
+    - `masuk_koki()`: Portal masuk bagi koki.
+    - `beranda_koki()`: Halaman beranda bagi koki.
+    - `portal_pengguna()`: Memisahkan pengguna yang sudah/belum punya User ID.
+    - `masuk_pengguna()`: Portal login dengan User ID.
+    - `daftar_pengguna()`: Membuat user baru dan login otomatis.
+    - `beranda_pengguna(user: User)`: Halaman beranda bagi pengguna.
+    - `buat_pesanan(user: User)`: Antarmuka membuat pesanann baru.
+    - `pesanan_pengguna(user: User)`: Antarmuka daftar pesanan pengguna.
     """
-    admin = Admin("admin", "admin")
+    admin = Admin("pass", "username") # Inisiasi username dan password admin
     def __init__(self):
         pass
 
     def print_dl(self, text: str, **kwargs):
         """Mencetak baris dengan jeda waktu tertentu."""
         print(text, **kwargs)
-        time.sleep(0.5)
+        time.sleep(0.25)
 
     def print_dc(self, text: str, **kwargs):
         """Mencetak karakter dengan jeda waktu tertentu."""
@@ -26,11 +46,11 @@ class CLI_Interface:
 
     def header_halaman(self, pesan: str):
         """Membuat header pada halalamn"""
-        self.print_dc("\n" + f"#{'=' * 100}#")
+        self.print_dl("\n" + f"#{'=' * 100}#")
         self.print_dc(f"{pesan.center(100, "-")}")
-        self.print_dc(f"#{'=' * 100}#" + "\n")
+        self.print_dl(f"#{'=' * 100}#" + "\n")
 
-    def valid(self):
+    def valid(self) -> bool:
         """Validasi masukan berupa Pertanyaan Ya/Tidak"""
         while True:
             masukan =input("(Y/T) > ")
@@ -50,6 +70,7 @@ class CLI_Interface:
         return
     
     def selamat_datang(self):
+        """Menampilkan pesan selamat datang"""
         self.print_dc(" ")
         self.print_dc("~"*100)
         self.print_dc("PANDA MANIS".center(100))
@@ -60,8 +81,8 @@ class CLI_Interface:
 
     def halaman_utama(self):
         """Halaman utama dan pertama ketika memulai program"""
+        self.header_halaman("HALAMAN UTAMA")
         while True:
-            self.header_halaman("HALAMAN UTAMA")
             self.print_dc(f"Pilih peran:")
             self.print_dc("1. Koki")
             self.print_dc("2. Pengguna")
@@ -139,8 +160,14 @@ class CLI_Interface:
             user = User.daftar.get(user_id)
             if user:
                 telp = input("Masukkan No. Telepon: > ")
-                self.beranda_pengguna(user)
-                break
+                if telp == user.telp:
+                    self.print_dc("Login berhasil!")
+                    self.beranda_pengguna(user)
+                    break
+                else:
+                    print("Nomor telepon tidak sesuai. Coba lagi?", end = " ")
+                    if not self.valid():
+                        break
             else:
                 print("User ID tidak ditemukan. Coba lagi?", end = " ")
                 if not self.valid():
@@ -197,7 +224,7 @@ class CLI_Interface:
         while True:
             try: 
                 meja = int(input("Masukkan Nomor Meja: "))
-                self.print_dl("Apakah nomor meja sudah benar?", end = " ")
+                self.print_dl("Yakin menmbuat order?", end = " ")
                 if self.valid():
                     break
             except:
@@ -239,7 +266,7 @@ class CLI_Interface:
             user.tambah_order(order)
             order.edit_status(Status.CANCELED)
             Order.antrean.remove(order)
-            self.print_dl("Pesanan dibatalkan.")
+            self.print_dl("Pesanan dibatalkan. Pesanan tetap akan ada di riwayat namun tidak akan diproses.")
         self.print_dl("\nAnda kembali ke menu pengguna.")
 
     def pesanan_pengguna(self, user: User):

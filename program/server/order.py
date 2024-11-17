@@ -1,6 +1,6 @@
-import datetime
-from server.item import Item
-from enum import Enum
+import datetime # Untuk mengambil waktu saat pesanan dibuat
+from server.item import Item # Import class Item dari file item.py
+from enum import Enum # Untuk membuat enumerasi status pesanan
 
 class Status(Enum):
     """Enumerasi status pesanan untuk mempermudah pengelompokan."""
@@ -30,6 +30,16 @@ class Order:
     - Status Pesanan: `status: Status`
 
     Argumen initialisasi: `Order(meja: int, user: User) -> Order`
+
+    Metode:
+    - `id_generator() -> str`: Membuat ID unik untuk pesanan.
+    - `cek_total() -> int`: Menghitung total harga pesanan.
+    - `cek_jumlah() -> int`: Menghitung jumlah item dalam pesanan.
+    - `tambah_item(item: Item, qty: int)`: Menambahkan item ke dalam pesanan jika belum ada.
+    - `edit_item(item: Item, qty: int)`: Mengedit jumlah item dalam pesanan jika ada.
+    - `edit_status(status: Status)`: Mengubah status pesanan.
+    - `cetak_struk() -> str`: Membuat string untuk mencetak struk pesanan.
+    - `__str__() -> str`: Membuat string untuk mencetak objek order.
     """
     counter = 0 # Jumlah order yang telah dibuat
     riwayat = {} # Daftar order yang telah dibuat
@@ -91,7 +101,7 @@ class Order:
         try:
             self.items[self.items.index(item)][1] = qty
             if qty <= 0:
-                self.hapus_item(item)
+                self.items.remove(item)
         except:
             print("Item tidak ditemukan.")
     
@@ -116,7 +126,7 @@ class Order:
         output += "~" * 67 + "\n"
         return output
 
-    def __str__(self):
+    def __str__(self) -> str:
         output = f"ID Pesanan: {self.ID}\n"
         output += f"Meja: {self.meja}\n"
         output += f"Status Pesanan: {self.status.value}\n"

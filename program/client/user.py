@@ -1,5 +1,5 @@
-from tkinter import messagebox
-from server.order import Order, Status
+from tkinter import messagebox # Untuk menampilkan notifikasi pesan
+from server.order import Order, Status # Import class Order dan Enum Status dari file order.py
 
 class User:
     """
@@ -7,13 +7,22 @@ class User:
 
     Atribut Global:
     - Penghitung user: `counter: int`
-    - Daftar: `daftar: dictionary`
+    - Daftar user: `daftar: dictionary`
 
     Atribut Lokal:
     - ID User: `ID: str`
     - Nama: `nama: str`
     - Telepon: `telp: str`
     - Daftar Pesanan: `orders: dictionary`
+
+    Argumen initialisasi: `User(nama: str, telp: str) -> User`
+
+    Metode:
+    - `id_generator() -> str`: Membuat ID unik untuk user.
+    - `tambah_order(order: Order)`: Menambahkan pesanan ke dalam daftar pesanan pengguna.
+    - `lihat_daftar() -> str`: Melihat daftar pesanan yang dimiliki pengguna.
+    - `notifikasi(order: Order)`: Memberitahu pengguna bahwa pesanannya sudah siap.
+    - `__str__() -> str`: Membuat string untuk mencetak objek user.
     """
 
     counter = 0 # Jumlah user yang telah dibuat
@@ -40,7 +49,6 @@ class User:
 
     def tambah_order(self, order: "Order"):
         """Menambahkan pesanan ke dalam daftar pesanan pengguna."""
-        from server.order import Order, Status
         self.orders[order.ID] = order
         Order.antrean.append(order)
         order.status = Status.CONFIRMED
@@ -60,7 +68,7 @@ class User:
         info = messagebox.showinfo("Pesanan Siap", f"Pesanan Anda #{order.ID} sudah siap diambil.")
         order.status = Status.COMPLETED
 
-    def __str__(self):
+    def __str__(self) -> str:
         output = f"User ID: {self.ID}\n"
         output += f"Nama: {self.nama}\n"
         output += f"Telepon: {self.telp}\n"

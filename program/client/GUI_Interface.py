@@ -1,12 +1,13 @@
-import tkinter as tk
-from tkinter import messagebox
-from client.user import User
-from server.item import Item
-from server.order import Order, Status
+import tkinter as tk # Import modul tkinter sebagai tk untuk membuat GUI
+from tkinter import messagebox, font # Untuk menampilkan pesan error atau informasi dan mengubah font
+from PIL import Image, ImageTk # Import modul Image dan ImageTk dari PIL untuk menampilkan gambar
+from client.user import User # Import class User dari file user.py
+from server.item import Item # Import class Item dari file item.py
+from server.order import Order, Status # Import class Order dan Enum Status dari file order.py
 
 class GUI_Interface:
     """
-    Antarmuka pengguna dalam bentuk window.
+    Antarmuka khusus pengguna dalam bentuk GUI (Graphical User Interface) melalui jendela interaktif.
     
     Atribut Lokal:
     `root: tk.Tk` -> Jendela utama aplikasi
@@ -19,21 +20,58 @@ class GUI_Interface:
     - `fsize_h3` -> Ukuran font untuk header 3
     - `fsize_n` -> Ukuran font untuk teks biasa
 
+    Atibut Lokal:
+    - `root: tk.Tk` -> Jendela utama aplikasi
+    - `header: tk.Label` -> Label untuk judul halaman
+
     Argumen initialisasi: `GUI_Interface(root: tk.Tk) -> GUI_Interface`
+
+    Metode:
+    - `mulai_hal()`: Fungsi pembantu untuk menginisiasi pembuatan halaman
+    - `buat_frame()`: Fungsi pembantu untuk menginisiasi grid pada halaman
+    - `hal_utama()`: Membuat antarmuka utama untuk memilih sebagai pengguna atau koki
+    - `hal_daftar_pengguna()`: Membuat antarmuka untuk pengguna baru untuk melakukan pemesanan
+    - `hal_masuk_pengguna()`: Membuat antarmuka untuk pengguna yang sudah ada untuk login
+    - `buat_user_baru()`: Membuat order baru berdasarkan input dari pengguna
+    - `masuk_user()`: Fungsi untuk login pengguna yang sudah ada
+    - `hal_beranda_user(user: User)`: Membuat antarmuka beranda setelah login pengguna
+    - `hal_lihat_pesanan(user: User, order: Order)`: Membuat antarmuka untuk melihat detail pesanan
+    - `hal_buat_pesanan_baru(user: User)`: Membuat antarmuka untuk membuat pesanan baru
+    - `hal_konfirmasi_pesanan(user: User)`: Membuat antarmuka untuk konfirmasi pesanan yang akan dibuat
+    - `buat_pesanan(user: User)`: Membuat pesanan baru berdasarkan input dari pengguna
+    - `batalkan_pesanan(user: User, order: Order)`: Membatalkan pesanan yang telah dibuat
     """
-    font_family = "Arial"
-    fsize_t = 20
-    fsize_h1 = 16
-    fsize_h2 = 14
-    fsize_h3 = 12
-    fsize_n = 10
+    font_family = "Segoe UI"
+    fsize_t = 18
+    fsize_h1 = 14
+    fsize_h2 = 12
+    fsize_h3 = 10
+    fsize_n = 8
 
     def __init__(self, root: tk.Tk):
         self.root: tk.Tk = root
-        self.root.title("Food Ordering System")
-        self.root.geometry("600x600")
-        self.root.resizable(True, True)
+        self.root.title("Sistem Pemesanan Makanan")
         
+        # Set font default
+        self.defaultFont = font.nametofont("TkDefaultFont")
+        self.defaultFont.configure(family=self.font_family, size=self.fsize_n)
+        
+        # Set ukuran jendela
+        window_width = 600
+        window_height = 700
+        self.root.geometry(f"{window_width}x{window_height}")
+        
+        # Dapatkan ukuran layar monitor
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        
+        # Hitung posisi jendela agar berada di tengah layar
+        position_x = (screen_width // 2) - (window_width // 2)
+        position_y = (screen_height // 2) - (window_height // 2)
+        
+        # Set posisi jendela
+        self.root.geometry(f"{window_width}x{window_height}+{position_x}+{position_y-30}")
+        self.root.resizable(True, True)
         self.hal_utama()
 
     def mulai_hal(self):
@@ -42,7 +80,7 @@ class GUI_Interface:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-    def buat_frame(self):
+    def buat_frame(self) -> tk.Frame:
         """Fungsi pembantu untuk menginisiasi grid pada halaman"""
         # Persiapan membuat tata letak grid
         self.root.grid_rowconfigure(0, weight=1)
@@ -62,8 +100,21 @@ class GUI_Interface:
         self.mulai_hal()
         
         # Label Judul
-        self.header = tk.Label(self.root, text="Selamat Datang di Restoran", font=(self.font_family, self.fsize_t))
-        self.header.pack(pady=20)
+        tk.Label(self.root, text="PANDA MANIS", font=(self.font_family, self.fsize_t)).pack(pady=(20, 0))
+        tk.Label(self.root, text="kaPAN DApat MAkaNan gratISnya?", font=(self.font_family, self.fsize_h1)).pack(pady=5)
+
+        # Label Logo Meme
+        self.image = Image.open("program\\client\\logo.jpeg")
+        self.image = self.image.resize((146, 194), Image.LANCZOS) 
+        self.image = ImageTk.PhotoImage(self.image)
+        label_image = tk.Label(self.root, image=self.image)
+        label_image.pack(pady=10)
+
+        # Label Info
+        tk.Label(self.root, text="Projek I Kelompok 5", font=(self.font_family, self.fsize_h2)).pack(pady=(20, 5))
+        tk.Label(self.root, text="Berpikir Komputasional - WI1102 Kelas 31", font=(self.font_family, self.fsize_h2)).pack(pady=5)
+        tk.Label(self.root, text="Sistem Pemesanan Makanan", font=(self.font_family, self.fsize_h2)).pack(pady=(5, 10))
+        tk.Label(self.root, text="Selamat Datang!", font=(self.font_family, self.fsize_t)).pack(pady=20)
 
         # Tombol Daftar Pengguna Baru
         self.tombol_daftar = tk.Button(self.root, text="Pengguna Baru", width=15, height=2, command=self.hal_daftar_pengguna)
@@ -72,6 +123,10 @@ class GUI_Interface:
         # Tombol Masuk bagi Pengguna Lama        
         self.tombol_masuk = tk.Button(self.root, text="Login Pengguna", width=15, height=2, command=self.hal_masuk_pengguna)
         self.tombol_masuk.pack(pady=10)
+
+        # Tombol Keluar
+        self.tombol_keluar = tk.Button(self.root, text="Keluar", width=15, height=2, command=self.root.quit)
+        self.tombol_keluar.pack(pady=10)
 
     def hal_daftar_pengguna(self):
         """Membuat antarmuka untuk pengguna baru untuk melakukan pemesanan"""
@@ -142,7 +197,7 @@ class GUI_Interface:
         
         # Buat user baru
         user = User(nama, telp)
-        messagebox.showinfo("Berhasil", f"User berhasil dibuat dengan ID: {user.ID}")
+        messagebox.showinfo("Berhasil", f"User berhasil dibuat dengan ID: {user.ID}\n Ingat ID Anda untuk masuk selanjutnya.")
         self.hal_beranda_user(user)
 
     def masuk_user(self):
@@ -241,6 +296,7 @@ class GUI_Interface:
         tk.Label(frame_item, text="Harga", font=(self.font_family, self.fsize_n)).grid(row=1, column=4, pady=5, sticky='nsew', padx=10)
         tk.Label(frame_item, text="Subtotal", font=(self.font_family, self.fsize_n)).grid(row=1, column=5, pady=5, sticky='nsew', padx=10)
 
+        # Menampilkan detail item
         total_harga = 0
         for idx, (item, qty) in enumerate(order.items, start=1):
             item: Item
@@ -252,8 +308,9 @@ class GUI_Interface:
             tk.Label(frame_item, text=f"{qty}").grid(row=idx + 1, column=3, sticky='w', padx=10, pady=2)
             tk.Label(frame_item, text=f"Rp {item.harga:,.2f}").grid(row=idx + 1, column=4, sticky='w', padx=10, pady=2)
             tk.Label(frame_item, text=f"Rp {subtotal:,.2f}").grid(row=idx + 1, column=5, sticky='w', padx=10, pady=2)
-                
-        tk.Label(frame_detail, text=f"Total Harga: Rp {total_harga:,.2f}", font=(self.font_family, self.fsize_h3)).grid(row=8, column=0, columnspan=2, pady=10, sticky='n')
+        tk.Label(frame_detail, text=f"Total Harga: Rp {total_harga:,.2f}", font=(self.font_family, self.fsize_n)).grid(row=8, column=0, columnspan=2, pady=10, sticky='n')
+
+        # Tombol untuk kembali
         tk.Button(frame_detail, text="Kembali", command=lambda: self.hal_beranda_user(user)).grid(row=9, column=0, columnspan=2, pady=5, sticky='n')
 
     def hal_buat_pesanan_baru(self, user: User):
@@ -269,18 +326,20 @@ class GUI_Interface:
         self.masukan_meja = tk.Entry(frame_pesanan)
         self.masukan_meja.grid(row=2, column=0, columnspan=2, pady=10, sticky='n')
 
-        # Frame untuk menampilkan daftar menu
+        # Frame kontainer
         tk.Label(frame_pesanan, text="Daftar Menu", font=(self.font_family, self.fsize_h2)).grid(row=3, column=0, columnspan=2, pady=10, sticky='nsew')
         frame_canvas = tk.Frame(frame_pesanan, width=600)
         frame_canvas.grid(row=4, column=0, columnspan=2, padx=20, pady=10, sticky="n")
         frame_canvas.grid_columnconfigure(0, weight=1)
 
+        # Scrollbar untuk daftar menu
         canvas = tk.Canvas(frame_canvas)
         canvas.grid(row=0, column=0, padx=20, pady=10, sticky="nsew")
         scrollbar = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
         scrollbar.grid(row=0, column=1, sticky="ns")
         canvas.configure(yscrollcommand=scrollbar.set)
 
+        # Frame untuk menampilkan daftar menu
         frame_menu = tk.Frame(canvas)
         canvas.create_window((0, 0), window=frame_menu, anchor='nw')
         frame_menu.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
@@ -292,6 +351,7 @@ class GUI_Interface:
         tk.Label(frame_menu, text="Harga").grid(row=0, column=2, sticky='w', padx=5, pady=2)
         tk.Label(frame_menu, text="Qty").grid(row=0, column=3, sticky='w', padx=5, pady=2)
 
+        # Menampilkan daftar menu dan menerima input jumlah pesanan
         self.entries_qty = {}
         for item_id, item in Item.menu.items():
             item: Item
@@ -302,7 +362,10 @@ class GUI_Interface:
             entry_qty.grid(row=item_id, column=3, padx=5, pady=2)
             self.entries_qty[item] = entry_qty
         
+        # Tombol untuk konfirmasi pesanan
         tk.Button(frame_pesanan, text="Konfirmasi Pesanan", command=lambda: self.hal_konfirmasi_pesanan(user)).grid(row=5, column=0, columnspan=2, pady=10, sticky='n')
+
+        # Tombol untuk kembali
         tk.Button(frame_pesanan, text="Kembali", command=lambda: self.hal_beranda_user(user)).grid(row=6, column=0, columnspan=2, pady=5, sticky='n')
 
     def hal_konfirmasi_pesanan(self, user: User):
@@ -328,19 +391,10 @@ class GUI_Interface:
             messagebox.showwarning("Input Error", "Silakan masukkan jumlah untuk setidaknya satu item!")
             return
         
-        # Membersihkan isi jendela sembelum mengisinya dengan widget baru
-        for widget in self.root.winfo_children():
-            widget.destroy()
+        self.mulai_hal()
+        frame_konfirmasi = self.buat_frame()
 
-        # Persiapan membuat tata letak grid
-        self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_columnconfigure(0, weight=1)
-
-        # Frame untuk menampilkan konfirmasi pesanan
-        frame_konfirmasi = tk.Frame(self.root)
-        frame_konfirmasi.grid(row=0, column=0, sticky='nsew')
-        frame_konfirmasi.grid_columnconfigure(0, weight=1)
-
+        # Label Detail Pesanan
         tk.Label(frame_konfirmasi, text="Detail Pesanan", font=(self.font_family, self.fsize_h1)).grid(row=0, column=0, columnspan=2, pady=10, sticky='nsew')
         tk.Label(frame_konfirmasi, text=f"User: {user.nama}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=1, column=0, sticky='w', padx=10, pady=2)
         tk.Label(frame_konfirmasi, text=f"User ID: {user.ID}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=2, column=0, sticky='w', padx=10, pady=2)
@@ -362,6 +416,7 @@ class GUI_Interface:
         tk.Label(frame_item, text="Harga", font=(self.font_family, self.fsize_n)).grid(row=1, column=4, pady=5, sticky='nsew', padx=10)
         tk.Label(frame_item, text="Subtotal", font=(self.font_family, self.fsize_n)).grid(row=1, column=5, pady=5, sticky='nsew', padx=10)
 
+        # Menampilkan detail item
         total_harga = 0
         for idx, (item, qty) in enumerate(items_pesanan, start=1):
             item: Item
@@ -373,11 +428,13 @@ class GUI_Interface:
             tk.Label(frame_item, text=f"{qty}").grid(row=idx + 1, column=3, sticky='w', padx=10, pady=2)
             tk.Label(frame_item, text=f"Rp {item.harga:,.2f}").grid(row=idx + 1, column=4, sticky='w', padx=10, pady=2)
             tk.Label(frame_item, text=f"Rp {subtotal:,.2f}").grid(row=idx + 1, column=5, sticky='w', padx=10, pady=2)
-        
-        tk.Label(frame_konfirmasi, text=f"Total Harga: Rp {total_harga:,.2f}", font=(self.font_family, self.fsize_h3)).grid(row=7, column=0, columnspan=2, pady=10, sticky='n')
+        tk.Label(frame_konfirmasi, text=f"Total Harga: Rp {total_harga:,.2f}", font=(self.font_family, self.fsize_n+2)).grid(row=7, column=0, columnspan=2, pady=10, sticky='n')
 
-        tk.Button(frame_konfirmasi, text="Buat Pesanan", command=lambda: self.buat_pesanan(user, meja, items_pesanan)).grid(row=8, column=0, pady=5, sticky='n')
-        tk.Button(frame_konfirmasi, text="Kembali", command=lambda: self.batalkan_pesanan(user, meja, items_pesanan)).grid(row=9, column=0, pady=5, sticky='n')
+        # Tombol untuk membuat pesanan
+        tk.Button(frame_konfirmasi, text="Buat Pesanan", command=lambda: self.buat_pesanan(user, meja, items_pesanan)).grid(row=8, column=0, pady=5, sticky='n', columnspan=2)
+
+        # Tombol untuk kembali
+        tk.Button(frame_konfirmasi, text="Kembali", command=lambda: self.batalkan_pesanan(user, meja, items_pesanan)).grid(row=9, column=0, pady=5, sticky='n', columnspan=2)
 
     def buat_pesanan(self, user: User, meja: int, items_pesanan: list):
         """Membuat pesanan baru berdasarkan input dari pengguna"""
@@ -400,6 +457,7 @@ class GUI_Interface:
         self.hal_beranda_user(user)
 
 def run():
+    """Fungsi untuk menjalankan aplikasi melalui GUI"""
     root = tk.Tk()
     app = GUI_Interface(root)
     root.mainloop()

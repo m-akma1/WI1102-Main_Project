@@ -12,6 +12,10 @@ class Item:
     - Harga (Rp): `harga: int`
 
     Argumen initialisasi: `Item(nama: str, harga: int) -> Item`
+    
+    Metode:
+    - `lihat_menu() -> str`: Membuat string untuk mencetak daftar menu makanan dan minuman.
+    - `__str__() -> str`: Membuat string untuk mencetak objek item.
     """
     counter = 0 # Jumlah item yang telah dibuat
     menu = {}   # Daftar menu yang ada
@@ -36,9 +40,10 @@ class Item:
         return output
 
     
-    def __str__(self):
+    def __str__(self) -> str:
         return f"#{self.ID:02d} | {self.nama:<15} | Rp {self.harga:10,.2f}"
     
+# Daftar menu makanan dan minuman
 Menu = [
     Item("Ayam Goreng", 10000),
     Item("Ayam Bakar", 12000),

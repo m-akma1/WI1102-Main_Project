@@ -1,19 +1,23 @@
-from server.order import Order, Status
-from client.user import User
+from server.order import Order, Status # Import class Order dan Enum Status dari file order.py
+from client.user import User # Import class User dari file user.py
 
 class Admin:
     """
-    Berisi semua informasi berkaitan dengan data dan perintah admin.
-
-    Atribut (tersembunyi):
-    - Username: `_username: str`
-    - Password: `_password: str`
+    Berisi semua informasi berkaitan dengan data dan perintah admin. Untuk menggunakan kemmampuan Admin, Admin harus login terlebih dahulu.
 
     Atribut Lokal:
+    - Username (tersembunyi): `_username: str`
+    - Password (tersembunyi): `_password: str`
     - Autentikasi: `auth: bool`
 
     Argumen initialisasi: `Admin(username: str, password: str) -> Admin`
-    Untuk menggunakan kemmampuan Admin, Admin harus login terlebih dahulu.
+
+    Metode:
+    - `login(username: str, password: str) -> bool`: Login ke sistem dengan memasukkan password.
+    - `logout()`: Logout dari sistem.
+    - `lihat_antrean()`: Melihat semua pesanan yang belum diproses.
+    - `proses_order()`: Mengambil pesanan terdepan dari antrean, mengubah statusnya, lalu memproses tiap itemnya.
+    - `selesai_order(order: Order)`: Menyelesaikan pesanan, mengubah statusnya, dan memberitahu pengguna.
     """
     def __init__(self, username: str, password: str):
         self._username = username
