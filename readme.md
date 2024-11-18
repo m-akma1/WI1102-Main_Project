@@ -20,14 +20,20 @@ Program ini akan mensimulasikan sistem pemesanan makanan yang memungkinkan pengg
 - Dua Antarmuka: Sistem ini mencakup GUI yang dibuat menggunakan Tkinter dan CLI untuk kompatibilitas yang lebih luas.
 
 ### Cara Penggunaan
-1. Pastikan Python sudah diinstal di komputer Anda. Jika belum, Anda bisa mengunduhnya [di sini](https://www.python.org/downloads/).  
+1. Pastikan Python sudah diinstal di komputer Anda. Jika belum, Anda bisa mengunduhnya [di sini](https://www.python.org/downloads/).
+2. Pastikan juga modul `PIL` (Pillow) sudah terinstal di Python Anda. Jika belum, Anda bisa menginstalnya dengan perintah berikut.
+```sh
+pip install pillow
+```
 2. Unduh zip file program ini dengan cara klik tombol "Code" hijau di atas dan pilih "Download ZIP", lalu ekstrak file zip yang sudah diunduh.
-3. Buka terminal atau Command Prompt, pindah ke direktori tempat file program ini disimpan, lalu jalankan program dengan perintah berikut.
+3. Buka terminal atau Command Prompt, pindah ke direktori tempat file program ini disimpan, lalu jalankan program dengan perintah berikut.  
+*Catatan: Pastikan Anda berada di dalam folder `program` sebelum menjalankan perintah berikut.*
 ```sh
 python main.py
 ```
 4. Akan ada dua opsi Anda berinteraksi dengan sistem: melalui CLI (*Command Line Interface*) atau GUI (*Graphical User Interface*). 
 5. Jendela baru GUI akan langsung muncul saat program dijalankan, sementara di saat bersamaan CLI akan tetap berjalan di terminal, Anda bisa memilih salah satu atau menjalankan keduanya bersamaan.
+6. Jika Anda ingin keluar, pastikan Anda keluar dari kedua antarmuka dan tidak ada subproses yang masih berjalan di terminal.
 
 ## Ringkasan Solusi Pemikiran Komputasional
 Ringkasan solusi pemikiran komputasional yang kami terapkan dalam program ini dapat Anda lihat [di sini](docs.md).

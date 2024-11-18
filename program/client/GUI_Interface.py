@@ -1,3 +1,4 @@
+import os        # Import modul os untuk mengakses path logo
 import tkinter as tk # Import modul tkinter sebagai tk untuk membuat GUI
 from tkinter import messagebox, font # Untuk menampilkan pesan error atau informasi dan mengubah font
 from PIL import Image, ImageTk # Import modul Image dan ImageTk dari PIL untuk menampilkan gambar
@@ -103,12 +104,20 @@ class GUI_Interface:
         tk.Label(self.root, text="PANDA MANIS", font=(self.font_family, self.fsize_t)).pack(pady=(20, 0))
         tk.Label(self.root, text="kaPAN DApat MAkaNan gratISnya?", font=(self.font_family, self.fsize_h1)).pack(pady=5)
 
-        # Label Logo Meme
-        self.image = Image.open("client\\logo.jpeg")
-        self.image = self.image.resize((146, 194), Image.LANCZOS) 
-        self.image = ImageTk.PhotoImage(self.image)
-        label_image = tk.Label(self.root, image=self.image)
-        label_image.pack(pady=10)
+        # Path Logo Meme
+        current_dir = os.path.dirname(__file__)
+        image_path = os.path.join(current_dir, "logo.jpeg")
+
+        try:
+            # Tampilkan Gambar
+            self.image = Image.open(image_path)
+            self.image = self.image.resize((146, 194), Image.LANCZOS) 
+            self.image = ImageTk.PhotoImage(self.image)
+            label_image = tk.Label(self.root, image=self.image)
+            label_image.pack(pady=10)
+        except FileNotFoundError:
+            # Jika gambar tidak ditemukan
+            pass
 
         # Label Info
         tk.Label(self.root, text="Projek I Kelompok 5", font=(self.font_family, self.fsize_h2)).pack(pady=(20, 5))

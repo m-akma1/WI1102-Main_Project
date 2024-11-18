@@ -1,3 +1,4 @@
+import sys # Untuk keluar dari program
 import time # Untuk mengatur jeda waktu
 from client.user import User # Import class User dari file user.py
 from server.item import Item # Import class Item dari file item.py
@@ -66,7 +67,7 @@ class CLI_Interface:
         self.header_halaman("KELUAR")
         self.print_dl("Apakah Anda yakin ingin keluar dari aplikasi?", end = " ")
         if self.valid():
-            exit()
+            sys.exit()
         return
     
     def selamat_datang(self):
@@ -118,7 +119,7 @@ class CLI_Interface:
             self.print_dc("A. Lihat Antrean")
             self.print_dc("B. Proses Pesanan")
             self.print_dc("C. Riwayat Pesanan")
-            self.print_dc("X. Logout")
+            self.print_dc("X. Keluar")
             pilihan = input("> ")
             if pilihan == "A" or pilihan == "a":
                 self.header_halaman("ANTREAN PESANAN")
@@ -131,12 +132,12 @@ class CLI_Interface:
             elif pilihan == "C"or pilihan == "c":
                 self.header_halaman("RIWAYAT PESANAN")
                 if not Order.riwayat:
-                    self.print_dl("Antrean kosong\n")
+                    self.print_dl("Belum ada riwayat pemesanan\n")
                 else:
                     for order in Order.riwayat.values():
                         self.print_dl(order)
             elif pilihan == "X" or pilihan == "x":
-                self.print_dc("Anda akan logout dan kembali ke halaman utama. Lanjutkan?", end = " ")
+                self.print_dc("Anda akan keluar dan kembali ke halaman utama. Lanjutkan?", end = " ")
                 if self.valid():
                     self.admin.logout()
                     break
@@ -191,7 +192,7 @@ class CLI_Interface:
             if self.valid():
                 user = User(nama, telp)
                 self.print_dl("User berhasil dibuat!")
-                self.print_dl(f"User ID Anda adalah: {user.ID}")
+                self.print_dl(f"User ID Anda adalah: {user.ID}. Ingat ini untuk masuk lagi ke akun Anda!")
                 self.beranda_pengguna(user)
                 break
             else:
@@ -204,15 +205,15 @@ class CLI_Interface:
         self.print_dc(f"Selamat datang, {user.nama}!\n")
         while True:
             self.print_dc("A. Buat Pesanan Baru")
-            self.print_dc("B. Lihat Daftar Pesanan")
-            self.print_dc("X. Logout")
+            self.print_dc("B. Lihat Riwayat Pesanan")
+            self.print_dc("X. Keluar")
             pilihan = input("> ")
             if pilihan == "A" or pilihan == "a":
                 self.buat_pesanan(user)
             elif pilihan == "B"or pilihan == "b":
                 self.pesanan_pengguna(user)
             elif pilihan == "X" or pilihan == "x":
-                self.print_dc("Anda akan logout dan kembali ke halaman utama. Lanjutkan?", end = " ")
+                self.print_dc("Anda akan keluar dan kembali ke halaman utama. Lanjutkan?", end = " ")
                 if self.valid():
                     break
             else:
@@ -271,7 +272,10 @@ class CLI_Interface:
 
     def pesanan_pengguna(self, user: User):
         """Antarmuka daftar pesanan pengguna"""
-        self.header_halaman("DAFTAR PESANAN PENGGUNA")
+        self.header_halaman("RIWAYAT PESANAN PENGGUNA")
+        if not user.orders:
+            self.print_dl("Anda belum memiliki riwayat pesanan.")
+            return
         self.print_dl(user.lihat_daftar())
         self.print_dc("Apakah Anda ingin melihat detail pesanan?", end = " ")
         if self.valid():
