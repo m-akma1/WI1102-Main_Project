@@ -1,6 +1,0 @@
-__version__ = "1.0.0"
-__author__ = "Muhammad Akmal"
-__email__ = "19624235@mahasiswa.itb.ac.id"
-__description__ = "Sisi klien untuk mengelola user dan menampilkan antarmuka CLI dan GUI."
-__license__ = "MIT"
-__url__ = "https://github.com/m-akma1/Project-I"
