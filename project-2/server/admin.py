@@ -44,7 +44,7 @@ class Admin:
         """Logout dari sistem."""
         if self.auth:
             self.auth = False
-            print("Logout berhasil.")
+            messagebox.showinfo("Berhasil", "Logout berhasil.")
         else:
             print("Anda belum login.")
 
@@ -61,33 +61,18 @@ class Admin:
             print(f"#Urutan ke-{urutan}")
             print(f"{order}\n")
         
-    def proses_order(self):
+    def proses_order(self, order: Order, selesai: list):
         """Mengambil pesanan terdepan dari antrean, mengubah statusnya, lalu memproses tiap itemnya."""
-        if not self.auth:
-            print("Anda harus login terlebih dahulu.")
+        if order.status in {Status.CANCELED, Status.READY, Status.PAID}:
+            messagebox.showerror("Error", "Tidak dapat memproses pesanan ini. Pesanan dibatalkan atau sudah selesai.")
             return
         
-        if not Order.antrean:
-            print("Antrean kosong\n")
-            return
-        order: Order = Order.antrean.pop(0)
-        order.edit_status(Status.IN_PROGRESS)
-        print(f"Memproses pesanan {order.ID}...")
-        print("Untuk setiap pesanan, tekan Enter untuk konfirmasi item selesai diproses.\n")
-        for i, item in enumerate(order.items, start=1):
-            input(f"{i}. Memproses {item[1]} porsi {item[0].nama}...")
-        
-        self.selesai_order(order)
-
-    def selesai_order(self, order: Order):
-        """
-        Menyelesaikan pesanan, mengubah statusnya, dan memberitahu pengguna.
-        """
-        if not self.auth:
-            print("Anda harus login terlebih dahulu.")
-            return
-        
-        order.edit_status(Status.READY)
+        for i, item in enumerate(order.items, start=0):
+            if selesai[i].get() == 0:
+                messagebox.showerror("Error", f"Item {item[0].nama} x {item[1]} buah belum diselesaikan.")
+                return
+        order = Order.antrean.pop(0)        
+        order.status = Status.READY
         print(f"Pesanan {order.ID} selesai diproses.\n")
         print(order.cetak_struk())
         user: User = User.daftar.get(order.user_id)

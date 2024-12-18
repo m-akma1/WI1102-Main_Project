@@ -1,15 +1,14 @@
-import datetime # Untuk mengambil waktu saat pesanan dibuat
 from server.item import Item # Import class Item dari file item.py
 from enum import Enum # Untuk membuat enumerasi status pesanan
 
 class Status(Enum):
     """Enumerasi status pesanan untuk mempermudah pengelompokan."""
-    PENDING = "Menunggu dikonfirmasi"
-    CANCELED = "Dibatalkan"
-    CONFIRMED = "Dikonfirmasi, dalam antrean"
-    IN_PROGRESS = "Dalam proses"
-    READY = "Siap diambil"
-    COMPLETED = "Selesai"
+    PENDING = "MENUNGGU"
+    CANCELED = "DIBATALKAN"
+    CONFIRMED = "DALAM ANTREAN"
+    IN_PROGRESS = "DIPROSES"
+    READY = "SIAP"
+    PAID = "LUNAS"
 
 class Order:
     """
@@ -37,7 +36,6 @@ class Order:
     - `cek_jumlah() -> int`: Menghitung jumlah item dalam pesanan.
     - `tambah_item(item: Item, qty: int)`: Menambahkan item ke dalam pesanan jika belum ada.
     - `edit_item(item: Item, qty: int)`: Mengedit jumlah item dalam pesanan jika ada.
-    - `edit_status(status: Status)`: Mengubah status pesanan.
     - `cetak_struk() -> str`: Membuat string untuk mencetak struk pesanan.
     - `__str__() -> str`: Membuat string untuk mencetak objek order.
     """
@@ -62,11 +60,9 @@ class Order:
           - `XXX` mengindikasikan nomor order
           - `NO` adalah 2 digit nomor meja
           - `USR` menunjuk pada inisial user
-          - `HHMMSS` adalah waktu ketika pesanan dibuat
         """
         Order.counter += 1
-        timestamp = datetime.datetime.now().strftime("%H%M%S")
-        return f"O-{Order.counter:03d}-{self.meja:02d}-{self.user_id[-3:]}-{timestamp}"
+        return f"O-{Order.counter:03d}-{self.meja:02d}-{self.user_id[-3:]}"
     
     def cek_total(self) -> int:
         """Menghitung total harga pesanan."""
@@ -105,10 +101,6 @@ class Order:
         except:
             print("Item tidak ditemukan.")
     
-    def edit_status(self, status: Status):
-        """Mengubah status pesanan."""
-        self.status = status
-
     def cetak_struk(self) -> str:
         """Membuat string untuk mencetak struk pesanan."""
         output = "~" * 67 + "\n"

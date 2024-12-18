@@ -38,7 +38,6 @@ class Item:
             output += f"{item}\n"
         output += f"^" * 38 + "\n"
         return output
-
     
     def __str__(self) -> str:
         return f"#{self.ID:02d} | {self.nama:<15} | Rp {self.harga:10,.2f}"

@@ -1,7 +1,7 @@
 import os        # Import modul os untuk mengakses path logo
 import ctypes    # Import modul ctypes untuk mengatur DPI agar GUI lebih jelas
 import tkinter as tk # Import modul tkinter sebagai tk untuk membuat GUI
-from tkinter import messagebox, font # Untuk menampilkan pesan error atau informasi dan mengubah font
+from tkinter import messagebox, font, ttk # Untuk menampilkan pesan error atau informasi dan mengubah font dan ukuran font
 from PIL import Image, ImageTk # Import modul Image dan ImageTk dari PIL untuk menampilkan gambar
 from client.admin_interface import admin_interface # Import class admin_interface dari file admin_interface.py
 from client.user import User # Import class User dari file user.py
@@ -32,29 +32,36 @@ class user_interface:
     - `root: tk.Tk` -> Jendela utama aplikasi
     - `header: tk.Label` -> Label untuk judul halaman
 
-    Argumen initialisasi: `GUI_Interface(root: tk.Tk) -> GUI_Interface`
+    Argumen initialisasi: `user_interface(root: tk.Tk, admin: admin_interface, id: int) -> tk.Tk`
 
     Metode:
     - `mulai_hal()`: Fungsi pembantu untuk menginisiasi pembuatan halaman
+    - `tutup_hal()`: Fungsi pembantu untuk menutup jendela
     - `buat_frame()`: Fungsi pembantu untuk menginisiasi grid pada halaman
     - `hal_utama()`: Membuat antarmuka utama untuk memilih sebagai pengguna atau koki
     - `hal_daftar_pengguna()`: Membuat antarmuka untuk pengguna baru untuk melakukan pemesanan
     - `hal_masuk_pengguna()`: Membuat antarmuka untuk pengguna yang sudah ada untuk login
-    - `buat_user_baru()`: Membuat order baru berdasarkan input dari pengguna
+    - `buat_user_baru()`: Membuat user baru berdasarkan input dari pengguna
     - `masuk_user()`: Fungsi untuk login pengguna yang sudah ada
     - `hal_beranda_user(user: User)`: Membuat antarmuka beranda setelah login pengguna
+    - `keluar_user()`: Keluar sebagai user
     - `hal_lihat_pesanan(user: User, order: Order)`: Membuat antarmuka untuk melihat detail pesanan
     - `hal_buat_pesanan_baru(user: User)`: Membuat antarmuka untuk membuat pesanan baru
     - `hal_konfirmasi_pesanan(user: User)`: Membuat antarmuka untuk konfirmasi pesanan yang akan dibuat
     - `buat_pesanan(user: User)`: Membuat pesanan baru berdasarkan input dari pengguna
     - `batalkan_pesanan(user: User, order: Order)`: Membatalkan pesanan yang telah dibuat
     """
+    # Set font default
     font_family = "Segoe UI"
     fsize_t = 18
     fsize_h1 = 14
     fsize_h2 = 12
     fsize_h3 = 10
     fsize_n = 8
+
+    # Path Logo 
+    current_dir = os.path.dirname(__file__)
+    image_path = os.path.join(current_dir, "new_logo.png")
 
     def __init__(self, root: tk.Tk, admin: admin_interface, id: int):
         # Inisialisasi jendela
@@ -84,7 +91,7 @@ class user_interface:
             widget.destroy()
     
     def tutup_hal(self):
-        """Fungsi untuk menutup jendela"""
+        """Fungsi pembantu untuk menutup jendela"""
         self.admin.tutup_hal_user(self.win_id)
         self.user_window.destroy()
 
@@ -110,14 +117,10 @@ class user_interface:
         tk.Label(self.user_window, text="PANDA MANIS", font=(self.font_family, self.fsize_t)).pack(pady=(20, 0))
         tk.Label(self.user_window, text="kaPAN DApat MAkaNan gratISnya?", font=(self.font_family, self.fsize_h1)).pack(pady=5)
 
-        # Path Logo Meme
-        current_dir = os.path.dirname(__file__)
-        image_path = os.path.join(current_dir, "logo.jpeg")
-
         try:
             # Tampilkan Gambar
-            self.image = Image.open(image_path)
-            self.image = self.image.resize((146, 194), Image.LANCZOS) 
+            self.image = Image.open(self.image_path)
+            self.image = self.image.resize((150, 150), Image.LANCZOS) 
             self.image = ImageTk.PhotoImage(self.image)
             label_image = tk.Label(self.user_window, image=self.image)
             label_image.pack(pady=10)
@@ -126,7 +129,7 @@ class user_interface:
             pass
 
         # Label Info
-        tk.Label(self.user_window, text="Projek I Kelompok 5", font=(self.font_family, self.fsize_h2)).pack(pady=(20, 5))
+        tk.Label(self.user_window, text="Projek II Kelompok 5", font=(self.font_family, self.fsize_h2)).pack(pady=(10, 5))
         tk.Label(self.user_window, text="Berpikir Komputasional - WI1102 Kelas 31", font=(self.font_family, self.fsize_h2)).pack(pady=5)
         tk.Label(self.user_window, text="Sistem Pemesanan Makanan", font=(self.font_family, self.fsize_h2)).pack(pady=(5, 10))
         tk.Label(self.user_window, text="Selamat Datang!", font=(self.font_family, self.fsize_t)).pack(pady=20)
@@ -225,16 +228,12 @@ class user_interface:
             messagebox.showwarning("Input Error", "Semua bidang harus diisi!")
             return
         
-        # Cek apakah user ditemukan
-        user_ditemukan: User = User.daftar.get(userID)
-        if not user_ditemukan:
-            messagebox.showerror("Login Gagal", "Pengguna tidak ditemukan!")
+        # Login
+        if User.login(userID, telp):
+            user = User.daftar[userID]
+            self.hal_beranda_user(user)
         else:
-            if user_ditemukan.telp == telp:
-                messagebox.showinfo("Login Berhasil", f"Selamat datang kembali, {user_ditemukan.nama}!")
-                self.hal_beranda_user(user_ditemukan)
-            else:
-                messagebox.showerror("Login Gagal", "Nomor telepon tidak sesuai User ID!")
+            return
 
     def hal_beranda_user(self, user: User):
         """Membuat antarmuka beranda setelah login pengguna."""
@@ -245,16 +244,14 @@ class user_interface:
         tk.Label(frame_dashboard, text=f"Halo, {user.nama}!", font=(self.font_family, self.fsize_h1), anchor='center').grid(row=0, column=0, columnspan=4, pady=10, sticky='nsew')
         
         # Label Detail Pengguna
-        tk.Label(frame_dashboard, text=f"User ID: {user.ID}", font=(self.font_family, self.fsize_n), anchor="w").grid(row=1, column=0, columnspan=4, padx=20, pady=2, sticky='nsew')
-        tk.Label(frame_dashboard, text=f"Nama: {user.nama}", font=(self.font_family, self.fsize_n), anchor="w").grid(row=2, column=0, columnspan=4, padx=20, pady=2, sticky='nsew')
-        tk.Label(frame_dashboard, text=f"Nomor Telepon: {user.telp}", font=(self.font_family, self.fsize_n), anchor="w").grid(row=3, column=0, columnspan=4, padx=20,  pady=2, sticky='nsew')
+        tk.Label(frame_dashboard, text=f"{user}", font=(self.font_family, self.fsize_n), anchor="w", justify="left").grid(row=1, column=0, columnspan=4, padx=20, pady=2, sticky='nsew')
         
         # Bagian Riwayat Pesanan
-        tk.Label(frame_dashboard, text="Riwayat Pesanan", font=(self.font_family, self.fsize_h2), anchor='center').grid(row=4, column=0, columnspan=4, pady=5, sticky='nsew')
+        tk.Label(frame_dashboard, text="Riwayat Pesanan", font=(self.font_family, self.fsize_h2), anchor='center').grid(row=2, column=0, columnspan=4, pady=5, sticky='nsew')
         
         # Frame untuk menampilkan riwayat pesanan
         frame_order_history = tk.Frame(frame_dashboard, width=600)
-        frame_order_history.grid(row=5, column=0, columnspan=2, padx=20, pady=10, sticky="n")
+        frame_order_history.grid(row=3, column=0, columnspan=2, padx=20, pady=10, sticky="n")
         frame_order_history.grid_columnconfigure(0, weight=1)
         
         if user.orders:
@@ -283,6 +280,13 @@ class user_interface:
         # Tombol Keluar
         tk.Button(frame_dashboard, text="Keluar", command=self.hal_utama).grid(row=len(user.orders) + 6, column=1, columnspan=2, pady=10)
 
+    def keluar_user(self):
+        """Keluar sebagai user."""
+        if messagebox.askokcancel("Konfirmasi", "Apakah Anda yakin ingin keluar?"):
+            self.hal_utama()
+        else:
+            return
+
     def hal_lihat_pesanan(self, user: User, order: Order):
         """Membuat antarmuka untuk melihat detail pesanan."""
         self.mulai_hal()
@@ -290,16 +294,12 @@ class user_interface:
 
         # Label Detail Pesanan
         tk.Label(frame_detail, text="Detail Pesanan", font=(self.font_family, self.fsize_h1)).grid(row=0, column=0, columnspan=2, pady=10, sticky='nsew')
-        tk.Label(frame_detail, text=f"User: {user.nama}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=1, column=0, sticky='w', padx=10, pady=2)
-        tk.Label(frame_detail, text=f"User ID: {user.ID}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=2, column=0, sticky='w', padx=10, pady=2)
-        tk.Label(frame_detail, text=f"Telepon: {user.telp}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=3, column=0, sticky='w', padx=10, pady=2)
-        tk.Label(frame_detail, text=f"Order ID: {order.ID}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=4, column=0, sticky='w', padx=10, pady=2)
-        tk.Label(frame_detail, text=f"Nomor Meja: {order.meja}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=5, column=0, sticky='w', padx=10, pady=2)
-        tk.Label(frame_detail, text=f"Status: {order.status.value}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=6, column=0, sticky='w', padx=10, pady=2)
+        tk.Label(frame_detail, text=f"{user}", font=(self.font_family, self.fsize_n), anchor="e", justify="left").grid(row=1, column=0, sticky='w', padx=10, pady=2)
+        tk.Label(frame_detail, text=f"{order}", font=(self.font_family, self.fsize_n), anchor="e", justify="left").grid(row=2, column=0, sticky='w', padx=10, pady=2)
 
         # Frame untuk menampilkan Detail Item
         frame_item = tk.Frame(frame_detail, width=800)
-        frame_item.grid(row=7, column=0, columnspan=2, padx=20, pady=10, sticky="n")
+        frame_item.grid(row=3, column=0, columnspan=2, padx=20, pady=10, sticky="n")
         frame_item.grid_columnconfigure(0, weight=1)
         
         # Label Detail Item
@@ -321,10 +321,13 @@ class user_interface:
             tk.Label(frame_item, text=f"{qty}").grid(row=idx + 1, column=3, sticky='w', padx=10, pady=2)
             tk.Label(frame_item, text=f"Rp {item.harga:,.2f}").grid(row=idx + 1, column=4, sticky='w', padx=10, pady=2)
             tk.Label(frame_item, text=f"Rp {subtotal:,.2f}").grid(row=idx + 1, column=5, sticky='w', padx=10, pady=2)
-        tk.Label(frame_detail, text=f"Total Harga: Rp {order.cek_total():,.2f}", font=(self.font_family, self.fsize_n)).grid(row=8, column=0, columnspan=2, pady=10, sticky='n')
+        tk.Label(frame_detail, text=f"Total Harga: Rp {order.cek_total():,.2f}", font=(self.font_family, self.fsize_n)).grid(row=4, column=0, columnspan=2, pady=10, sticky='n')
+
+        # Tombol mengedit pesanan
+        tk.Button(frame_detail, text="Edit Pesanan", command=lambda: self.hal_edit_pesanan(user, order)).grid(row=6, column=0, columnspan=2, pady=5, sticky='n')
 
         # Tombol untuk kembali
-        tk.Button(frame_detail, text="Kembali", command=lambda: self.hal_beranda_user(user)).grid(row=9, column=0, columnspan=2, pady=5, sticky='n')
+        tk.Button(frame_detail, text="Kembali", command=lambda: self.hal_beranda_user(user)).grid(row=7, column=0, columnspan=2, pady=5, sticky='n')
 
     def hal_buat_pesanan_baru(self, user: User):
         """Membuat antarmuka untuk membuat pesanan baru."""
@@ -409,9 +412,7 @@ class user_interface:
 
         # Label Detail Pesanan
         tk.Label(frame_konfirmasi, text="Detail Pesanan", font=(self.font_family, self.fsize_h1)).grid(row=0, column=0, columnspan=2, pady=10, sticky='nsew')
-        tk.Label(frame_konfirmasi, text=f"User: {user.nama}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=1, column=0, sticky='w', padx=10, pady=2)
-        tk.Label(frame_konfirmasi, text=f"User ID: {user.ID}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=2, column=0, sticky='w', padx=10, pady=2)
-        tk.Label(frame_konfirmasi, text=f"Telepon: {user.telp}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=3, column=0, sticky='w', padx=10, pady=2)
+        tk.Label(frame_konfirmasi, text=f"{user}", font=(self.font_family, self.fsize_n), anchor="e", justify="left").grid(row=1, column=0, sticky='w', padx=10, pady=2)
         tk.Label(frame_konfirmasi, text=f"Nomor Meja: {meja}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=4, column=0, sticky='w', padx=10, pady=2)
         tk.Label(frame_konfirmasi, text=f"Status: {Status.PENDING.value}", font=(self.font_family, self.fsize_n), anchor="e").grid(row=5, column=0, sticky='w', padx=10, pady=2)
 
@@ -447,7 +448,7 @@ class user_interface:
         tk.Button(frame_konfirmasi, text="Buat Pesanan", command=lambda: self.buat_pesanan(user, meja, items_pesanan)).grid(row=8, column=0, pady=5, sticky='n', columnspan=2)
 
         # Tombol untuk kembali
-        tk.Button(frame_konfirmasi, text="Kembali", command=lambda: self.batalkan_pesanan(user, meja, items_pesanan)).grid(row=9, column=0, pady=5, sticky='n', columnspan=2)
+        tk.Button(frame_konfirmasi, text="Kembali", command=lambda: self.hal_buat_pesanan_baru(user)).grid(row=9, column=0, pady=5, sticky='n', columnspan=2)
 
     def buat_pesanan(self, user: User, meja: int, items_pesanan: list):
         """Membuat pesanan baru berdasarkan input dari pengguna"""
@@ -458,13 +459,19 @@ class user_interface:
         messagebox.showinfo("Berhasil", f"Pesanan berhasil dibuat dengan ID: {pesanan_baru.ID}")
         self.hal_beranda_user(user)
 
-    def batalkan_pesanan(self, user: User, meja: int, items_pesanan: list):
+    def hal_edit_pesanan(self, user: User, order: Order):
+        messagebox.showwarning("Error", "Maaf, Fitur belum tersedia.")
+        return
+        if order.status == Status.IN_PROGRESS:
+            messagebox.showwarning("Error", "Pesanan sedang diproses. Tidak dapat mengedit pesanan.")
+            return
+        self.mulai_hal()
+        frame_edit = self.buat_frame()
+        pass
+
+    def batalkan_pesanan(self, user: User, order: Order):
         """Membatalkan pesanan yang sedang dibuat"""
-        pesanan_baru = Order(meja, user.ID)
-        for item, qty in items_pesanan:
-            pesanan_baru.tambah_item(item, qty)
-        user.tambah_order(pesanan_baru)
-        pesanan_baru.edit_status(Status.CANCELED)
-        Order.antrean.remove(pesanan_baru)
+        order.status = Status.CANCELED
+        Order.antrean.remove(order)
         messagebox.showinfo("Info", "Pesanan dibatalkan. Pesanan tetap akan ada di riwayat namun tidak akan diproses.")
-        self.hal_beranda_user(user)
+        self.hal_edit_pesanan(user, order)
