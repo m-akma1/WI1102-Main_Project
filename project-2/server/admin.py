@@ -24,6 +24,7 @@ class Admin:
         self._username = username
         self._password = password
         self.auth = False
+        self.pemasukan = 0
         return
     
     def login(self, username: str, password: str) -> bool:
@@ -67,12 +68,13 @@ class Admin:
             messagebox.showerror("Error", "Tidak dapat memproses pesanan ini. Pesanan dibatalkan atau sudah selesai.")
             return
         
-        for i, item in enumerate(order.items, start=0):
+        for i, (item, qty) in enumerate(order.items.items(), start=0):
             if selesai[i].get() == 0:
-                messagebox.showerror("Error", f"Item {item[0].nama} x {item[1]} buah belum diselesaikan.")
+                messagebox.showerror("Error", f"Item {item.nama} x {qty} buah belum diselesaikan.")
                 return
         order = Order.antrean.pop(0)        
         order.status = Status.READY
+        
         print(f"Pesanan {order.ID} selesai diproses.\n")
         print(order.cetak_struk())
         user: User = User.daftar.get(order.user_id)

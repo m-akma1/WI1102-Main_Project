@@ -6,7 +6,7 @@ class Status(Enum):
     PENDING = "MENUNGGU"
     CANCELED = "DIBATALKAN"
     CONFIRMED = "DALAM ANTREAN"
-    IN_PROGRESS = "DIPROSES"
+    IN_PROGRESS = "DALAM PROSES"
     READY = "SIAP"
     PAID = "LUNAS"
 
@@ -44,7 +44,7 @@ class Order:
     antrean = [] # Antrean order yang belum diproses
     def __init__(self, meja: int, user_id: str):
         self.meja = meja
-        self.items = []
+        self.items = {}
         self.total = 0
         self.jumlah = 0
         self.user_id = user_id
@@ -67,52 +67,38 @@ class Order:
     def cek_total(self) -> int:
         """Menghitung total harga pesanan."""
         total = 0
-        for item in self.items:
-            item: list[Item, int]
-            total += item[0].harga * item[1]
+        for item, qty in self.items.items():
+            total += item.harga * qty
         self.total = total
         return self.total
 
     def cek_jumlah(self) -> int:
         """Menghitung jumlah item dalam pesanan."""
         jumlah = 0
-        for item in self.items:
-            jumlah += item[1]
+        for qty in self.items.values():
+            jumlah += qty
         self.jumlah = jumlah
         return self.jumlah
     
     def tambah_item(self, item: Item, qty: int):
-        """
-        Menambahkan item ke dalam pesanan jika belum ada.
-        Jika sudah ada, tambahkan jumlahnya.
-        """
-        for row in self.items:
-            if row[0] == item:
-                row[1] += qty
-                return
-        self.items.append([item, qty])
-    
-    def edit_item(self, item: "Item", qty: int):
-        """Mengedit jumlah item dalam pesanan jika ada."""
-        try:
-            self.items[self.items.index(item)][1] = qty
-            if qty <= 0:
-                self.items.remove(item)
-        except:
-            print("Item tidak ditemukan.")
-    
+        """Menambah atau mengedit item  dalam pesanan"""
+        if  qty <= 0:
+            return
+        self.items[item] = qty
+        self.cek_jumlah()
+        self.cek_total()
+        
     def cetak_struk(self) -> str:
         """Membuat string untuk mencetak struk pesanan."""
         output = "~" * 67 + "\n"
         output += f"ID Pesanan: {self.ID:>54}\n"
         output += f"User ID: {self.user_id:}\n"
         output += f"Meja: {self.meja:02d}\n"
-        output += f"Status Pesanan: {self.status.value}\n"
+        output += f"Status Pesanan: {self.status.value}\n\n"
         output += f"{'No':<2} |  ID | {'Item':^15} | {'Harga':^13} | {'Qty':^5} | {"Subtotal":^13}\n"
         output += "-" * 67 + "\n"
-        for item in self.items:
-            item: list[Item, int]
-            output += f"{self.items.index(item)+1:02d} | {item[0]} | {item[1]:^5} | Rp {item[0].harga * item[1]:10,.2f}\n"
+        for i, (item, qty) in enumerate(self.items.items(), start=1):
+            output += f"{i:02d} | #{(item.ID):02d} | {(item.nama)} | {(qty):^5} | Rp {(item.harga * qty):10,.2f}\n"
         output += "-" * 67 + "\n"
         output += f"Total | Rp {self.cek_total():,.2f}\n".rjust(67)
         output += "~" * 67 + "\n"

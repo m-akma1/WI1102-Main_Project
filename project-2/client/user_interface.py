@@ -272,13 +272,16 @@ class user_interface:
                 tk.Button(frame_order_history, text="Lihat", command=lambda o=order: self.hal_lihat_pesanan(user, o)).grid(row=idx, column=4, padx=5, pady=2, sticky='nsew')
         else:
             # Jika belum ada riwayat pesanan
-            tk.Label(frame_dashboard, text="Belum ada riwayat pesanan.").grid(row=5, column=0, columnspan=4, pady=5)
+            tk.Label(frame_order_history, text="Belum ada riwayat pesanan.").grid(row=0, column=0, columnspan=4, pady=5)
+        
+        # Tombol refresh
+        tk.Button(frame_dashboard, text="Refresh", command=lambda: self.hal_beranda_user(user)).grid(row=4, column=0, columnspan=1, pady=10)
         
         # Tombol untuk membuat pesanan baru
-        tk.Button(frame_dashboard, text="Buat Pesanan Baru", command=lambda: self.hal_buat_pesanan_baru(user)).grid(row=len(user.orders) + 6, column=0, columnspan=1, pady=10)
+        tk.Button(frame_dashboard, text="Buat Pesanan Baru", command=lambda: self.hal_buat_pesanan_baru(user)).grid(row=4, column=1, columnspan=1, pady=10)
         
         # Tombol Keluar
-        tk.Button(frame_dashboard, text="Keluar", command=self.hal_utama).grid(row=len(user.orders) + 6, column=1, columnspan=2, pady=10)
+        tk.Button(frame_dashboard, text="Keluar", command=self.hal_utama).grid(row=len(user.orders) + 5, column=0, columnspan=2, pady=10)
 
     def keluar_user(self):
         """Keluar sebagai user."""
@@ -312,7 +315,7 @@ class user_interface:
         tk.Label(frame_item, text="Subtotal", font=(self.font_family, self.fsize_n)).grid(row=1, column=5, pady=5, sticky='nsew', padx=10)
 
         # Menampilkan detail item
-        for idx, (item, qty) in enumerate(order.items, start=1):
+        for idx, (item, qty) in enumerate(order.items.items(), start=1):
             item: Item
             subtotal = item.harga * qty
             tk.Label(frame_item, text=f"{idx}").grid(row=idx + 1, column=0, sticky='w', padx=10, pady=2)
@@ -324,10 +327,16 @@ class user_interface:
         tk.Label(frame_detail, text=f"Total Harga: Rp {order.cek_total():,.2f}", font=(self.font_family, self.fsize_n)).grid(row=4, column=0, columnspan=2, pady=10, sticky='n')
 
         # Tombol mengedit pesanan
-        tk.Button(frame_detail, text="Edit Pesanan", command=lambda: self.hal_edit_pesanan(user, order)).grid(row=6, column=0, columnspan=2, pady=5, sticky='n')
+        tk.Button(frame_detail, text="Edit Pesanan", command=lambda: self.hal_edit_pesanan(user, order)).grid(row=5, column=0, columnspan=1, pady=5, sticky='n')
+
+        # Tombol untuk membatalkan pesanan
+        tk.Button(frame_detail, text="Batalkan Pesanan", command=lambda: self.batalkan_pesanan(user, order)).grid(row=5, column=1, columnspan=1, pady=5, sticky='n')
+
+        # Tombol refresh
+        tk.Button(frame_detail, text="Refresh", command=lambda: self.hal_lihat_pesanan(user, order)).grid(row=6, column=0, columnspan=1, pady=5, sticky='n')
 
         # Tombol untuk kembali
-        tk.Button(frame_detail, text="Kembali", command=lambda: self.hal_beranda_user(user)).grid(row=7, column=0, columnspan=2, pady=5, sticky='n')
+        tk.Button(frame_detail, text="Kembali", command=lambda: self.hal_beranda_user(user)).grid(row=6, column=1, columnspan=1, pady=5, sticky='n')
 
     def hal_buat_pesanan_baru(self, user: User):
         """Membuat antarmuka untuk membuat pesanan baru."""
@@ -368,15 +377,15 @@ class user_interface:
         tk.Label(frame_menu, text="Qty").grid(row=0, column=3, sticky='w', padx=5, pady=2)
 
         # Menampilkan daftar menu dan menerima input jumlah pesanan
-        self.entries_qty = {}
+        self.masukan_qty = {}
         for item_id, item in Item.menu.items():
             item: Item
             tk.Label(frame_menu, text=f"#{item.ID}").grid(row=item_id, column=0, sticky='w', padx=5, pady=2)
             tk.Label(frame_menu, text=item.nama).grid(row=item_id, column=1, sticky='w', padx=5, pady=2)
             tk.Label(frame_menu, text=f"Rp {item.harga:,.2f}").grid(row=item_id, column=2, sticky='w', padx=5, pady=2)
-            entry_qty = tk.Entry(frame_menu, width=5)
-            entry_qty.grid(row=item_id, column=3, padx=5, pady=2)
-            self.entries_qty[item] = entry_qty
+            qty = tk.Entry(frame_menu, width=5)
+            qty.grid(row=item_id, column=3, padx=5, pady=2)
+            self.masukan_qty[item] = qty
         
         # Tombol untuk konfirmasi pesanan
         tk.Button(frame_pesanan, text="Konfirmasi Pesanan", command=lambda: self.hal_konfirmasi_pesanan(user)).grid(row=5, column=0, columnspan=2, pady=10, sticky='n')
@@ -394,16 +403,17 @@ class user_interface:
             return
         meja = int(meja)
 
-        # Mengumpulkan item yang dipesan
-        items_pesanan = []
-        for item, entry in self.entries_qty.items():
+        # Validasi Jumlah Item
+        daftar_qty = {}
+        for item, entry in self.masukan_qty.items():
             entry: tk.Entry
             qty = entry.get()
             if qty.isdigit() and int(qty) > 0:
-                items_pesanan.append((item, int(qty)))
+                daftar_qty[item] = int(qty)
+
         
         # Validasi Jumlah Item
-        if not items_pesanan:
+        if not daftar_qty:
             messagebox.showwarning("Input Error", "Silakan masukkan jumlah untuk setidaknya satu item!")
             return
         
@@ -432,7 +442,7 @@ class user_interface:
 
         # Menampilkan detail item
         total_harga = 0
-        for idx, (item, qty) in enumerate(items_pesanan, start=1):
+        for idx, (item, qty) in enumerate(daftar_qty.items(), start=1):
             item: Item
             subtotal = item.harga * qty
             total_harga += subtotal
@@ -445,33 +455,128 @@ class user_interface:
         tk.Label(frame_konfirmasi, text=f"Total Harga: Rp {total_harga:,.2f}", font=(self.font_family, self.fsize_n+2)).grid(row=7, column=0, columnspan=2, pady=10, sticky='n')
 
         # Tombol untuk membuat pesanan
-        tk.Button(frame_konfirmasi, text="Buat Pesanan", command=lambda: self.buat_pesanan(user, meja, items_pesanan)).grid(row=8, column=0, pady=5, sticky='n', columnspan=2)
+        tk.Button(frame_konfirmasi, text="Buat Pesanan", command=lambda: self.buat_pesanan(user, meja, daftar_qty)).grid(row=8, column=0, pady=5, sticky='n', columnspan=2)
 
         # Tombol untuk kembali
-        tk.Button(frame_konfirmasi, text="Kembali", command=lambda: self.hal_buat_pesanan_baru(user)).grid(row=9, column=0, pady=5, sticky='n', columnspan=2)
+        tk.Button(frame_konfirmasi, text="Batalkan", command=lambda: self.hal_buat_pesanan_baru(user)).grid(row=9, column=0, pady=5, sticky='n', columnspan=2)
 
-    def buat_pesanan(self, user: User, meja: int, items_pesanan: list):
+    def buat_pesanan(self, user: User, meja: int, masukan_item_qty: dict):
         """Membuat pesanan baru berdasarkan input dari pengguna"""
         pesanan_baru = Order(meja, user.ID)
-        for item, qty in items_pesanan:
+        for item, qty in masukan_item_qty.items():
             pesanan_baru.tambah_item(item, qty)
         user.tambah_order(pesanan_baru)
         messagebox.showinfo("Berhasil", f"Pesanan berhasil dibuat dengan ID: {pesanan_baru.ID}")
         self.hal_beranda_user(user)
 
     def hal_edit_pesanan(self, user: User, order: Order):
-        messagebox.showwarning("Error", "Maaf, Fitur belum tersedia.")
-        return
-        if order.status == Status.IN_PROGRESS:
-            messagebox.showwarning("Error", "Pesanan sedang diproses. Tidak dapat mengedit pesanan.")
+        if order.status != Status.CONFIRMED:
+            messagebox.showwarning("Error", f"Tidak dapat mengedit pesanan. Status Pesanan: {order.status.value}")
             return
         self.mulai_hal()
         frame_edit = self.buat_frame()
-        pass
+        order.status = Status.PENDING        
+        # Label Judul
+        tk.Label(frame_edit, text="Edit Pesanan", font=(self.font_family, self.fsize_h1)).grid(row=0, column=0, columnspan=2, pady=10, sticky='nsew')
+
+        # Kontainer Nomor Meja
+        tk.Label(frame_edit, text="Nomor Meja: ").grid(row=1, column=0, columnspan=2, pady=10, sticky='nsew')
+        self.editan_meja = tk.Entry(frame_edit)
+        self.editan_meja.grid(row=2, column=1, pady=10, sticky='n')
+        self.editan_meja.insert(0, str(order.meja))
+
+        # Frame kontainer
+        frame_canvas = tk.Frame(frame_edit, width=600)
+        frame_canvas.grid(row=3, column=0, columnspan=2, padx=20, pady=10, sticky="n")
+        frame_canvas.grid_columnconfigure(0, weight=1)
+
+        # Scrollbar untuk daftar menu
+        canvas = tk.Canvas(frame_canvas)
+        canvas.grid(row=0, column=0, padx=20, pady=10, sticky="nsew")
+        scrollbar = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+        scrollbar.grid(row=0, column=1, sticky="ns")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Frame untuk menampilkan daftar menu
+        frame_item = tk.Frame(canvas)
+        canvas.create_window((0, 0), window=frame_item, anchor='nw')
+        frame_item.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        frame_item.grid_columnconfigure(0, weight=1)
+
+        # Header Tabel Menu
+        tk.Label(frame_item, text="ID").grid(row=0, column=0, sticky='w', padx=5, pady=2)
+        tk.Label(frame_item, text="Item").grid(row=0, column=1, sticky='w', padx=5, pady=2)
+        tk.Label(frame_item, text="Harga").grid(row=0, column=2, sticky='w', padx=5, pady=2)
+        tk.Label(frame_item, text="Qty").grid(row=0, column=3, sticky='w', padx=5, pady=2)
+        
+        # Menampilkan daftar menu dengan jumlah pesanan yang sudah diisi
+        self.editan_qty = {}
+        for item_id, item in Item.menu.items():
+            item: Item
+            tk.Label(frame_item, text=f"#{item.ID}").grid(row=item_id, column=0, sticky='w', padx=5, pady=2)
+            tk.Label(frame_item, text=item.nama).grid(row=item_id, column=1, sticky='w', padx=5, pady=2)
+            tk.Label(frame_item, text=f"Rp {item.harga:,.2f}").grid(row=item_id, column=2, sticky='w', padx=5, pady=2)
+            entry_qty = tk.Entry(frame_item, width=5)
+            entry_qty.insert(0, str(order.items.get(item, "")))
+            entry_qty.grid(row=item_id, column=3, padx=5, pady=2)
+            self.editan_qty[item] = entry_qty
+
+        # Tombol Konfirmasi Edit
+        tk.Button(frame_edit, text="Konfirmasi Edit", command=lambda: self.hal_konfirmasi_edit(user, order)).grid(row=4, column=0, columnspan=2, pady=10, sticky='n')
+
+        # Tombol Batalkan Pesanan
+        tk.Button(frame_edit, text="Batalkan Pesanan", command=lambda: self.batalkan_pesanan(user, order)).grid(row=5, column=0, columnspan=2, pady=10, sticky='n')
+
+        # Tombol Kembali
+        tk.Button(frame_edit, text="Batalkan Edit", command=lambda: self.batal_edit(user, order)).grid(row=6, column=0, columnspan=2, pady=10, sticky='n')
+
+    def batal_edit(self, user: User, order: Order):
+        """Membatalkan edit pesanan yang sedang dilakukan."""
+        order.status = Status.CONFIRMED
+        self.hal_lihat_pesanan(user, order)
+
+    def hal_konfirmasi_edit(self, user: User, order: Order):
+        """Membuat antarmuka untuk konfirmasi pesanan yang akan diubah."""
+        if not messagebox.askokcancel("Konfirmasi", "Apakah Anda yakin ingin mengubah pesanan?"):
+            return
+
+        # Validasi Nomor Meja
+        meja = self.editan_meja.get()
+        if not (meja.isdigit() and 0 <= int(meja) <= 99):
+            messagebox.showwarning("Input Error", "Nomor meja harus berupa angka antara 0 hingga 99!")
+            return
+        meja = int(meja)
+
+        # Mengumpulkan item yang dipesan
+        masukan_item_qty = {}
+        for item, entry in self.editan_qty.items():
+            entry: tk.Entry
+            qty = entry.get()
+            if qty.isdigit() and int(qty) > 0:
+                masukan_item_qty[item] = int(qty)
+        
+        # Validasi Jumlah Item
+        if not masukan_item_qty:
+            messagebox.showwarning("Input Error", "Silakan masukkan jumlah untuk setidaknya satu item!")
+            return
+                
+        order.items.clear()
+        for item, qty in masukan_item_qty.items():
+            order.tambah_item(item, qty)
+
+        order.meja = meja
+        order.status = Status.CONFIRMED
+        messagebox.showinfo("Berhasil", f"Pesanan berhasil diubah.")
+        self.hal_lihat_pesanan(user, order)
 
     def batalkan_pesanan(self, user: User, order: Order):
         """Membatalkan pesanan yang sedang dibuat"""
+        if order.status != Status.CONFIRMED or order.status != Status.PENDING:
+            messagebox.showwarning("Error", f"Tidak dapat membatalkan pesanan. Status Pesanan: {order.status.value}")
+            return
+        if not messagebox.askokcancel("Konfirmasi", "Apakah Anda yakin ingin membatalkan pesanan?"):
+            return
         order.status = Status.CANCELED
         Order.antrean.remove(order)
         messagebox.showinfo("Info", "Pesanan dibatalkan. Pesanan tetap akan ada di riwayat namun tidak akan diproses.")
-        self.hal_edit_pesanan(user, order)
+        self.hal_lihat_pesanan(user, order)
