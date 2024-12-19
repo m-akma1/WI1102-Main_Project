@@ -219,7 +219,7 @@ class admin_interface:
         # Label Statistik Hari ini
         tk.Label(frame_dashboard, text="Statistik Hari Ini", font=(self.font_family, self.fsize_h2), anchor='center').grid(row=1, column=0, columnspan=4, pady=5, sticky='nsew')
         tk.Label(frame_dashboard, text=f"Total pesanan dibuat: {order_dibuat} pesanan", font=(self.font_family, self.fsize_n), anchor='w', justify="left").grid(row=2, column=0, columnspan=4, sticky='nsew', padx= 10)
-        tk.Label(frame_dashboard, text=f"Total item dipesan: {item_diselesaikan}", font=(self.font_family, self.fsize_n), anchor='w', justify="left").grid(row=3, column=0, columnspan=4, sticky='nsew', padx= 10)
+        tk.Label(frame_dashboard, text=f"Total item diselesaikan: {item_diselesaikan}", font=(self.font_family, self.fsize_n), anchor='w', justify="left").grid(row=3, column=0, columnspan=4, sticky='nsew', padx= 10)
         tk.Label(frame_dashboard, text=f"Total pendapatan diterima: Rp {pendapatan_diterima:,.2f}", font=(self.font_family, self.fsize_n), anchor='w', justify="left").grid(row=4, column=0, columnspan=4, sticky='nsew', padx= 10)
         
         # Bagian Antrean Pesanan
@@ -284,6 +284,9 @@ class admin_interface:
         popup.mainloop()
 
     def konfirmasi_proses_pesanan(self, popup: tk.Toplevel, order: Order):
+        if not Order.antrean:
+            messagebox.showerror("Error", "Tidak ada pesanan yang sedang diproses.")
+            return
         if Order.antrean[0] != order:
             if not messagebox.askokcancel("Konfirmasi", "Pesanan ini bukan pesanan terdepan. Apakah Anda yakin ingin memprosesnya?"):
                 return
