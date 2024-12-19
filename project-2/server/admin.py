@@ -1,6 +1,6 @@
 from tkinter import messagebox # Import messagebox dari tkinter
 from server.order import Order, Status # Import class Order dan Enum Status dari file order.py
-from client.user import User # Import class User dari file user.py
+from server.user import User # Import class User dari file user.py
 
 class Admin:
     """
@@ -24,7 +24,6 @@ class Admin:
         self._username = username
         self._password = password
         self.auth = False
-        self.pemasukan = 0
         return
     
     def login(self, username: str, password: str) -> bool:
@@ -46,26 +45,11 @@ class Admin:
         if self.auth:
             self.auth = False
             messagebox.showinfo("Berhasil", "Logout berhasil.")
-        else:
-            print("Anda belum login.")
-
-    def lihat_antrean(self):
-        """Melihat semua pesanan yang belum diproses."""
-        if not self.auth:
-            print("Anda harus login terlebih dahulu.")
-            return
-        
-        if not Order.antrean:
-            print("Antrean kosong\n")
-            return
-        for urutan, order in enumerate(Order.antrean, start=1):
-            print(f"#Urutan ke-{urutan}")
-            print(f"{order}\n")
         
     def proses_order(self, order: Order, selesai: list):
         """Mengambil pesanan terdepan dari antrean, mengubah statusnya, lalu memproses tiap itemnya."""
-        if order.status in {Status.CANCELED, Status.READY, Status.PAID}:
-            messagebox.showerror("Error", "Tidak dapat memproses pesanan ini. Pesanan dibatalkan atau sudah selesai.")
+        if order.status != Status.CONFIRMED:
+            messagebox.showerror("Error", "Tidak dapat memproses pesanan ini. Sat")
             return
         
         for i, (item, qty) in enumerate(order.items.items(), start=0):

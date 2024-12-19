@@ -6,7 +6,7 @@ from PIL import Image, ImageTk # Import modul Image dan ImageTk dari PIL untuk m
 from server.admin import Admin
 from server.order import Order, Status
 from server.item import Item
-from client.user import User
+from server.user import User
 
 try:
     ctypes.windll.shcore.SetProcessDpiAwareness(1)  # Meningkatkan kualitas tampilan GUI pada layar dengan DPI tinggi
@@ -43,20 +43,20 @@ class admin_interface:
         self.defaultFont = font.nametofont("TkDefaultFont")
         self.defaultFont.configure(family=self.font_family, size=self.fsize_n)
         
-        # Set ukuran jendela
-        window_width = 600
-        window_height = 800
-        
         # Dapatkan ukuran layar monitor
         screen_width = self.admin_window.winfo_screenwidth()
         screen_height = self.admin_window.winfo_screenheight()
+
+        # Set ukuran jendela
+        window_width = 600
+        window_height = 800
         
         # Hitung posisi jendela agar berada di tengah layar
         position_x = (screen_width // 2) - (window_width // 2)
         position_y = (screen_height // 2) - (window_height // 2)
         
         # Set posisi jendela
-        self.admin_window.geometry(f"{window_width}x{window_height}+{position_x}+{position_y-30}")
+        self.admin_window.geometry(f"{window_width}x{window_height}+{position_x}+{position_y-(window_height//20)}")
         self.admin_window.resizable(True, True)
 
         # Siapkan penghitung jendela user

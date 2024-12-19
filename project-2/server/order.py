@@ -98,7 +98,7 @@ class Order:
         output += f"{'No':<2} |  ID | {'Item':^15} | {'Harga':^13} | {'Qty':^5} | {"Subtotal":^13}\n"
         output += "-" * 67 + "\n"
         for i, (item, qty) in enumerate(self.items.items(), start=1):
-            output += f"{i:02d} | #{(item.ID):02d} | {(item.nama)} | {(qty):^5} | Rp {(item.harga * qty):10,.2f}\n"
+            output += f"{i:02d} | {item} | {(qty):^5} | Rp {(item.harga * qty):10,.2f}\n"
         output += "-" * 67 + "\n"
         output += f"Total | Rp {self.cek_total():,.2f}\n".rjust(67)
         output += "~" * 67 + "\n"

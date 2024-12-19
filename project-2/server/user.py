@@ -68,13 +68,6 @@ class User:
         self.orders[order.ID] = order
         Order.antrean.append(order)
         order.status = Status.CONFIRMED
-
-    def lihat_daftar(self) -> str:
-        """Melihat daftar pesanan yang dimiliki pengguna."""
-        output = ""
-        for order in self.orders.values():
-            output += f"{order}\n"
-        return output
     
     def notifikasi(self, order: Order):
         """Memberitahu pengguna bahwa pesanannya sudah siap."""

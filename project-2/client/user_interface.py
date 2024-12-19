@@ -4,7 +4,7 @@ import tkinter as tk # Import modul tkinter sebagai tk untuk membuat GUI
 from tkinter import messagebox, font, ttk # Untuk menampilkan pesan error atau informasi dan mengubah font dan ukuran font
 from PIL import Image, ImageTk # Import modul Image dan ImageTk dari PIL untuk menampilkan gambar
 from client.admin_interface import admin_interface # Import class admin_interface dari file admin_interface.py
-from client.user import User # Import class User dari file user.py
+from server.user import User # Import class User dari file user.py
 from server.item import Item # Import class Item dari file item.py
 from server.order import Order, Status # Import class Order dan Enum Status dari file order.py
 
@@ -571,7 +571,7 @@ class user_interface:
 
     def batalkan_pesanan(self, user: User, order: Order):
         """Membatalkan pesanan yang sedang dibuat"""
-        if order.status != Status.CONFIRMED or order.status != Status.PENDING:
+        if order.status != Status.CONFIRMED and order.status != Status.PENDING:
             messagebox.showwarning("Error", f"Tidak dapat membatalkan pesanan. Status Pesanan: {order.status.value}")
             return
         if not messagebox.askokcancel("Konfirmasi", "Apakah Anda yakin ingin membatalkan pesanan?"):
