@@ -76,9 +76,10 @@ class User:
             output += f"{order}\n"
         return output
     
-    def notifikasi(self, order: "Order"):
+    def notifikasi(self, order: Order):
         """Memberitahu pengguna bahwa pesanannya sudah siap."""
         info = messagebox.showinfo("Pesanan Siap", f"Pesanan Anda #{order.ID} sudah siap diambil.")
+        order.status = Status.PAID
 
     def __str__(self) -> str:
         output = f"User ID: {self.ID}\n"
