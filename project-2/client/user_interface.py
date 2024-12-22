@@ -15,42 +15,45 @@ except Exception:
 
 class user_interface:
     """
-    Antarmuka khusus pengguna dalam bentuk GUI (Graphical User Interface) melalui jendela interaktif.
-    
+    Class user_interface berfungsi untuk membuat antarmuka pengguna yang dapat melakukan pemesanan makanan.
+
+    Attribut Global:
+    - `font_family: str` -> Nama font yang digunakan pada antarmuka.
+    - `fsize_t: int` -> Ukuran font untuk judul.
+    - `fsize_h1: int` -> Ukuran font untuk header 1.
+    - `fsize_h2: int` -> Ukuran font untuk header 2.
+    - `fsize_h3: int` -> Ukuran font untuk header 3.
+    - `fsize_n: int` -> Ukuran font untuk teks biasa.
+    - `current_dir: str` -> Path direktori saat ini.
+    - `image_path: str` -> Path logo aplikasi.
+
     Atribut Lokal:
-    `root: tk.Tk` -> Jendela utama aplikasi
+    - `admin: admin_interface` -> Class admin_interface untuk mengakses data dari admin.
+    - `win_id: int` -> ID jendela.
+    - `user_window: tk.Tk` -> Jendela utama aplikasi.
 
-    Atribut Global:
-    - `font_family` -> Font yang akan digunakan
-    - `fsize_t` -> Ukuran font untuk judul
-    - `fsize_h1` -> Ukuran font untuk header 1
-    - `fsize_h2` -> Ukuran font untuk header 2
-    - `fsize_h3` -> Ukuran font untuk header 3
-    - `fsize_n` -> Ukuran font untuk teks biasa
-
-    Atibut Lokal:
-    - `root: tk.Tk` -> Jendela utama aplikasi
-    - `header: tk.Label` -> Label untuk judul halaman
-
-    Argumen initialisasi: `user_interface(root: tk.Tk, admin: admin_interface, id: int) -> tk.Tk`
+    Argumen inisialisasi: `user_interface(root: tk.Tk, admin: admin_interface, id: int) -> None`
 
     Metode:
-    - `mulai_hal()`: Fungsi pembantu untuk menginisiasi pembuatan halaman
-    - `tutup_hal()`: Fungsi pembantu untuk menutup jendela
-    - `buat_frame()`: Fungsi pembantu untuk menginisiasi grid pada halaman
-    - `hal_utama()`: Membuat antarmuka utama untuk memilih sebagai pengguna atau koki
-    - `hal_daftar_pengguna()`: Membuat antarmuka untuk pengguna baru untuk melakukan pemesanan
-    - `hal_masuk_pengguna()`: Membuat antarmuka untuk pengguna yang sudah ada untuk login
-    - `buat_user_baru()`: Membuat user baru berdasarkan input dari pengguna
-    - `masuk_user()`: Fungsi untuk login pengguna yang sudah ada
-    - `hal_beranda_user(user: User)`: Membuat antarmuka beranda setelah login pengguna
-    - `keluar_user()`: Keluar sebagai user
-    - `hal_lihat_pesanan(user: User, order: Order)`: Membuat antarmuka untuk melihat detail pesanan
-    - `hal_buat_pesanan_baru(user: User)`: Membuat antarmuka untuk membuat pesanan baru
-    - `hal_konfirmasi_pesanan(user: User)`: Membuat antarmuka untuk konfirmasi pesanan yang akan dibuat
-    - `buat_pesanan(user: User)`: Membuat pesanan baru berdasarkan input dari pengguna
-    - `batalkan_pesanan(user: User, order: Order)`: Membatalkan pesanan yang telah dibuat
+    - `mulai_hal() -> None` -> Funsgi pembantu untuk menginisiasi pembuatan halaman.
+    - `tutup_hal() -> None` -> Fungs pembantu untuk menutup jendela.
+    - `buat_frame() -> tk.Frame` -> Fungsi pembantu untuk menginisiasi grid pada halaman.
+    - `hal_utama() -> None` -> Membuat antarmuka utama untuk memilih sebagai pengguna atau koki.
+    - `hal_daftar_pengguna() -> None` -> Membuat antarmuka untuk pengguna baru untuk melakukan pemesanan.
+    - `hal_masuk_pengguna() -> None` -> Membuat antarmuka untuk pengguna yang sudah ada untuk login.
+    - `buat_user_baru() -> None` -> Membuat order baru berdasarkan input dari pengguna.
+    - `masuk_user() -> None` -> Fungsi untuk login pengguna yang sudah ada.
+    - `hal_beranda_user(user: User) -> None` -> Membuat antarmuka beranda setelah login pengguna.
+    - `keluar_user() -> None` -> Keluar sebagai user.
+    - `hal_lihat_pesanan(user: User, order: Order) -> None` -> Membuat antarmuka untuk melihat detail pesanan.
+    - `hal_buat_pesanan_baru(user: User) -> None` -> Membuat antarmuka untuk membuat pesanan baru.
+    - `hal_konfirmasi_pesanan(user: User) -> None` -> Membuat antarmuka untuk konfirmasi pesanan yang akan dibuat.
+    - `buat_pesanan(user: User, meja: int, masukan_item_qty: dict) -> None` -> Membuat pesanan baru berdasarkan input dari pengguna.
+    - `hal_edit_pesanan(user: User, order: Order) -> None` -> Membuat antarmuka untuk mengedit pesanan yang sudah ada jika statusnya benar.
+    - `hal_konfirmasi_edit(user: User, order: Order) -> None` -> Mengonfirmasi pesanan yang akan diubah.
+    - `batalkan_pesanan(user: User, order: Order) -> None` -> Membatalkan pesanan yang sedang dilihat.
     """
+
     # Set font default
     font_family = "Segoe UI"
     fsize_t = 18
@@ -75,9 +78,7 @@ class user_interface:
         self.defaultFont.configure(family=self.font_family, size=self.fsize_n)
         
         # Set ukuran jendela
-        window_width = 600
-        window_height = 800
-        self.user_window.geometry(f"{window_width}x{window_height}")
+        self.user_window.geometry(f"{admin.window_width}x{admin.window_height}")
         self.user_window.resizable(True, True)
 
         # Jalankan program
@@ -470,9 +471,14 @@ class user_interface:
         self.hal_beranda_user(user)
 
     def hal_edit_pesanan(self, user: User, order: Order):
+        """Membuat antarmuka untuk mengedit pesanan yang sudah ada jika statusnya benar."""
+        
+        # Memeriksa Status Pesanan
         if order.status != Status.CONFIRMED:
             messagebox.showwarning("Error", f"Tidak dapat mengedit pesanan. Status Pesanan: {order.status.value}")
             return
+        
+        # Inisialisasi Halaman
         self.mulai_hal()
         frame_edit = self.buat_frame()
         order.status = Status.PENDING        
@@ -536,7 +542,7 @@ class user_interface:
         self.hal_lihat_pesanan(user, order)
 
     def hal_konfirmasi_edit(self, user: User, order: Order):
-        """Membuat antarmuka untuk konfirmasi pesanan yang akan diubah."""
+        """Mengonfirmasi pesanan yang akan diubah."""
         if not messagebox.askokcancel("Konfirmasi", "Apakah Anda yakin ingin mengubah pesanan?"):
             return
 
@@ -570,12 +576,15 @@ class user_interface:
         self.hal_lihat_pesanan(user, order)
 
     def batalkan_pesanan(self, user: User, order: Order):
-        """Membatalkan pesanan yang sedang dibuat"""
-        if order.status != Status.CONFIRMED and order.status != Status.PENDING:
-            messagebox.showwarning("Error", f"Tidak dapat membatalkan pesanan. Status Pesanan: {order.status.value}")
+        """Membatalkan pesanan yang sedang dilihat"""
+        # Memeriksa Status Pesanan
+        if order.status not in [Status.CONFIRMED, Status.PENDING]:
+            messagebox.showerror("Error", f"Tidak dapat membatalkan pesanan. Status Pesanan: {order.status.value}")
             return
         if not messagebox.askokcancel("Konfirmasi", "Apakah Anda yakin ingin membatalkan pesanan?"):
             return
+        
+        # Membatalkan pesanan
         order.status = Status.CANCELED
         Order.antrean.remove(order)
         messagebox.showinfo("Info", "Pesanan dibatalkan. Pesanan tetap akan ada di riwayat namun tidak akan diproses.")

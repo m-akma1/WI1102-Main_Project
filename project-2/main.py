@@ -19,4 +19,4 @@ from client import user_interface as user # Impor modul interface dari client
 if __name__ == "__main__":
     root = tk.Tk() # Membuat objek root dari kelas Tk
     admin_window = admin.admin_interface(root, user.user_interface) # Membuat objek admin_window dari kelas admin_interface
-    root.mainloop()
+    root.mainloop() # Menjalankan antarmuka admin_window 

@@ -34,8 +34,7 @@ class Order:
     - `id_generator() -> str`: Membuat ID unik untuk pesanan.
     - `cek_total() -> int`: Menghitung total harga pesanan.
     - `cek_jumlah() -> int`: Menghitung jumlah item dalam pesanan.
-    - `tambah_item(item: Item, qty: int)`: Menambahkan item ke dalam pesanan jika belum ada.
-    - `edit_item(item: Item, qty: int)`: Mengedit jumlah item dalam pesanan jika ada.
+    - `tambah_item(item: Item, qty: int)`: Menambah atau mengedit item ke dalam pesanan.
     - `cetak_struk() -> str`: Membuat string untuk mencetak struk pesanan.
     - `__str__() -> str`: Membuat string untuk mencetak objek order.
     """

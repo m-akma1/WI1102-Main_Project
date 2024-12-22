@@ -1,12 +1,12 @@
-import os
-import ctypes
-import tkinter as tk
-from tkinter import messagebox, font, ttk
+import os   # Import modul os untuk mengakses path file
+import ctypes   # Import modul ctypes untuk mengakses fungsi Windows API
+import tkinter as tk # Import modul tkinter sebagai GUI
+from tkinter import messagebox, font, ttk # Import modul messagebox, font, dan ttk dari tkinter
 from PIL import Image, ImageTk # Import modul Image dan ImageTk dari PIL untuk menampilkan gambar
-from server.admin import Admin
-from server.order import Order, Status
-from server.item import Item
-from server.user import User
+from server.admin import Admin  # Import class Admin dari server.admin
+from server.order import Order, Status # Import class Order dan Status dari server.order
+from server.item import Item # Import class Item dari server.item
+from server.user import User # Import class User dari server.user
 
 try:
     ctypes.windll.shcore.SetProcessDpiAwareness(1)  # Meningkatkan kualitas tampilan GUI pada layar dengan DPI tinggi
@@ -15,8 +15,47 @@ except Exception:
 
 class admin_interface:
     """
-    Class untuk membuat antarmuka admin.
+    Class untuk membuat antarmuka admin. Berisi fungsi-fungsi untuk membuat halaman login, dashboard, dan riwayat pesanan.
+
+    Attribut Global:
+    - `font_family: str` -> Nama font yang digunakan pada antarmuka.
+    - `fsize_t: int` -> Ukuran font untuk judul.
+    - `fsize_h1: int` -> Ukuran font untuk header 1.
+    - `fsize_h2: int` -> Ukuran font untuk header 2.
+    - `fsize_h3: int` -> Ukuran font untuk header 3.
+    - `fsize_n: int` -> Ukuran font untuk teks biasa.
+    - `current_dir: str` -> Path direktori saat ini.
+    - `image_path: str` -> Path logo aplikasi.
+
+    Attribut Lokal:
+    - `root: tk.Tk` -> Jendela utama aplikasi.
+    - `admin_window: tk.Tk` -> Jendela admin.
+    - `user_gui_class: class` -> Class antarmuka user.
+    - `admin: Admin` -> Objek Admin.
+    - `icon: ImageTk.PhotoImage` -> Icon aplikasi.
+    - `defaultFont: font.Font` -> Font default aplikasi.
+    - `win_counter: int` -> Penghitung jendela user.
+    - `active_windows: dict` -> Daftar jendela user yang aktif.
+    
+    Argumen Inisialisasi: `admin_interface(root: tk.Tk, user_gui_class: class) -> None`
+
+    Metode:
+    - `mulai_hal() -> None` -> Fungsi pembantu untuk menginisiasi pembuatan halaman.
+    - `tutup_hal() -> None` -> Fungsi pembantu untuk menutup jendela.
+    - `buat_frame() -> tk.Frame` -> Fungsi pembantu untuk menginisiasi grid pada halaman.
+    - `hal_masuk_admin() -> None` -> Membuat halaman login admin.
+    - `buat_hal_user_baru() -> None` -> Membuat jendela user baru.
+    - `tutup_hal_user(win_id: int) -> None` -> Menutup jendela user.
+    - `masuk_admin() -> None` -> Mengarahkan ke halaman dashboard jika login berhasil.
+    - `hal_beranda_admin() -> None` -> Membuat halaman dashboard admin.
+    - `hal_riwayat_pesanan() -> None` -> Membuat halaman riwayat pesanan.
+    - `popup_detail_pesanan(order: Order) -> None` -> Membuat popup untuk mencetak struk pesanan.
+    - `konfirmasi_proses_pesanan(popup: tk.Toplevel, order: Order) -> None` -> Konfirmasi proses pesanan.
+    - `hal_proses_pesanan(order: Order) -> None` -> Membuat antarmuka untuk melihat detail pesanan.
+    - `kembali(order: Order) -> None` -> Konfirmasi kembali dari memproses pesanan.
+    - `keluar_admin() -> None` -> Keluar sebagai admin.    
     """
+
     font_family = "Segoe UI"
     fsize_t = 18
     fsize_h1 = 14
@@ -48,15 +87,15 @@ class admin_interface:
         screen_height = self.admin_window.winfo_screenheight()
 
         # Set ukuran jendela
-        window_width = 600
-        window_height = 800
+        self.window_width = screen_width // 2
+        self.window_height = screen_height * 4 // 5
         
         # Hitung posisi jendela agar berada di tengah layar
-        position_x = (screen_width // 2) - (window_width // 2)
-        position_y = (screen_height // 2) - (window_height // 2)
+        position_x = (screen_width // 2) - (self.window_width // 2)
+        position_y = (screen_height // 2) - (self.window_height // 2)
         
         # Set posisi jendela
-        self.admin_window.geometry(f"{window_width}x{window_height}+{position_x}+{position_y-(window_height//20)}")
+        self.admin_window.geometry(f"{self.window_width}x{self.window_height}+{position_x}+{position_y-(screen_height//20)}")
         self.admin_window.resizable(True, True)
 
         # Siapkan penghitung jendela user
@@ -75,7 +114,7 @@ class admin_interface:
             widget.destroy()
 
     def tutup_hal(self):
-        """Fungsi untuk menutup jendela"""
+        """Fungsi pembantu untuk menutup jendela"""
         self.root.quit()
         self.root.destroy()
 
@@ -112,7 +151,7 @@ class admin_interface:
             # Jika gambar tidak ditemukan
             pass
 
-        # Label Info
+        # Label Info Tugas Besar
         tk.Label(self.admin_window, text="Projek II Kelompok 5", font=(self.font_family, self.fsize_h2)).pack(pady=(10, 5))
         tk.Label(self.admin_window, text="Berpikir Komputasional - WI1102 Kelas 31", font=(self.font_family, self.fsize_h2)).pack(pady=5)
         tk.Label(self.admin_window, text="Sistem Pemesanan Makanan", font=(self.font_family, self.fsize_h2)).pack(pady=(5))
@@ -121,10 +160,10 @@ class admin_interface:
         # Label Info
         tk.Label(self.admin_window, text="Login Admin", font=(self.font_family, self.fsize_h2)).pack(pady=10)
 
+        # Entri username dan password
         tk.Label(self.admin_window, text="Username:", font=(self.font_family, self.fsize_n)).pack()
         self.username_entry = tk.Entry(self.admin_window)
         self.username_entry.pack()
-
         tk.Label(self.admin_window, text="Password:", font=(self.font_family, self.fsize_n)).pack()
         self.password_entry = tk.Entry(self.admin_window, show="*")
         self.password_entry.pack()
@@ -133,15 +172,17 @@ class admin_interface:
         self.visible = tk.BooleanVar()
         tk.Checkbutton(self.admin_window, text="Tampilkan Password",font=(self.font_family, self.fsize_n) ,variable=self.visible, command= lambda: self.password_entry.config(show= "" if self.visible.get() else "*")).pack()
 
+        # Tombol-Tombol
         tk.Button(self.admin_window, text="Login", width=15, height=2, command=self.masuk_admin).pack(pady=10)
-
         tk.Button(self.admin_window, text="Buat Jendela Baru", width=15, height=2, command=self.buat_hal_user_baru).pack(pady=10)
 
     def buat_hal_user_baru(self):
+        """Fungsi pembantu membuat jendela user baru."""
         self.win_counter += 1
         self.active_windows[self.win_counter] = self.user_gui_class(self.root, self, self.win_counter)
 
     def tutup_hal_user(self, win_id: int):
+        """Fungsi pembantu menutup jendela user."""
         self.active_windows.pop(win_id)
 
     def masuk_admin(self):
@@ -166,7 +207,7 @@ class admin_interface:
         frame_order_history.grid(row=2, column=0, columnspan=2, padx=20, pady=10, sticky="n")
         frame_order_history.grid_columnconfigure(0, weight=1)
         
-        if Order.antrean:
+        if Order.antrean: # Jika ada pesanan dalam antrean
             # Membuat header tabel riwayat pesanan
             tk.Label(frame_order_history, text="Order ID", font=(self.font_family, 12)).grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
             tk.Label(frame_order_history, text="Meja", font=(self.font_family, 12)).grid(row=0, column=1, padx=5, pady=5, sticky='nsew')
@@ -185,7 +226,7 @@ class admin_interface:
                 tk.Label(frame_order_history, text=f"Rp {order.cek_total():,.2f}").grid(row=idx, column=4, padx=5, sticky='nsew')
                 tk.Button(frame_order_history, text="Lihat", command=lambda o=order: self.popup_detail_pesanan(o)).grid(row=idx, column=5, padx=5, pady=2, sticky='nsew')
         else:
-            # Jika belum ada riwayat pesanan
+            # Jika belum ada antrean pesanan
             tk.Label(frame_order_history, text="Belum ada pesanan masuk.").grid(row=0, column=0, columnspan=2, pady=5)
         
         # Tombol Refresh
@@ -230,7 +271,7 @@ class admin_interface:
         frame_order_history.grid(row=6, column=0, columnspan=2, padx=20, pady=10, sticky="n")
         frame_order_history.grid_columnconfigure(0, weight=1)
         
-        if Order.riwayat:
+        if Order.riwayat: # Jika ada pesanan dalam riwayat
             # Membuat header tabel riwayat pesanan
             tk.Label(frame_order_history, text="Order ID", font=(self.font_family, 12)).grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
             tk.Label(frame_order_history, text="Meja", font=(self.font_family, 12)).grid(row=0, column=1, padx=5, pady=5, sticky='nsew')
@@ -260,12 +301,14 @@ class admin_interface:
 
     def popup_detail_pesanan(self, order: Order):
         """Membuat popup untuk mencetak struk pesanan."""
+        # Inisiasi popup
         popup = tk.Toplevel(self.admin_window)
         popup.title("Detail Pesanan")
         popup.geometry("800x400")
         popup.resizable(True, True)
         popup.geometry(f"+{popup.winfo_screenwidth() // 2 - 200}+{popup.winfo_screenheight() // 2 - 100}")
 
+        # Inisiasi frame
         text_frame = tk.Frame(popup, pady=10, padx=10)
         text_frame.pack(fill="both", expand=True)
         text = tk.Text(text_frame, wrap="word", height=5, relief="solid", borderwidth=1)
@@ -281,9 +324,10 @@ class admin_interface:
 
         popup.transient()  # Membuat popup terikat pada jendela utama
         popup.grab_set()   # Memastikan popup harus ditutup sebelum jendela utama dapat diakses lagi
-        popup.mainloop()
+        popup.mainloop()   # Menjalankan popup
 
     def konfirmasi_proses_pesanan(self, popup: tk.Toplevel, order: Order):
+        """Konfirmasi proses pesanan."""
         if not Order.antrean:
             messagebox.showerror("Error", "Tidak ada pesanan yang sedang diproses.")
             return
@@ -300,10 +344,11 @@ class admin_interface:
             messagebox.showerror("Error", f"Tidak dapat memproses pesanan ini. Status pesanan {order.status.value}.")
             return
         
+        # Inisiasi halaman
         self.mulai_hal()
         frame_detail = self.buat_frame()
         user: User = User.daftar.get(order.user_id)
-        order.status = Status.IN_PROGRESS
+        order.status = Status.IN_PROGRESS # Ubah status pesanan menjadi DIPROSES
 
         # Label Detail Pesanan
         tk.Label(frame_detail, text="Detail Pesanan", font=(self.font_family, self.fsize_h1)).grid(row=0, column=0, columnspan=2, pady=10, sticky='nsew')
@@ -346,10 +391,18 @@ class admin_interface:
         tk.Button(frame_detail, text="Kembali", command=lambda: self.kembali(order)).grid(row=9, column=1, columnspan=1, pady=5, sticky='n')
 
     def kembali(self, order: Order):
-        """Konfirmasi kembali dari memproses pesanan"""
+        """Konfirmasi pilihan opsi kembali dari memproses pesanan"""
+
+        # Jika pesanan masih dalam proses
         if order.status == Status.IN_PROGRESS:
-            if messagebox.askokcancel("Konfirmasi", "Apakah Anda yakin ingin kembali? Pesanan ini akan tetap ditandai sebagai DIPROSES sehingga user tidak akan dapat mengubahnya lagi."):
+            pilihan = messagebox.askyesnocancel("Konfirmasi", f"Pesanan ini belum diproses. Apakah Anda ingin menyimpan perubahan status pesanan? Jika status pesanan {Status.IN_PROGRESS}, pesanan tidak akan dapat diedit oleh pengguna.")
+            if pilihan == True:
                 self.hal_beranda_admin()
+            elif pilihan == False:
+                order.status = Status.CONFIRMED
+                self.hal_beranda_admin()
+            elif pilihan == None:
+                return
         else:
             self.hal_beranda_admin()
 

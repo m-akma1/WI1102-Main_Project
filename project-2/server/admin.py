@@ -16,9 +16,8 @@ class Admin:
     Metode:
     - `login(username: str, password: str) -> bool`: Login ke sistem dengan memasukkan password.
     - `logout()`: Logout dari sistem.
-    - `lihat_antrean()`: Melihat semua pesanan yang belum diproses.
-    - `proses_order()`: Mengambil pesanan terdepan dari antrean, mengubah statusnya, lalu memproses tiap itemnya.
-    - `selesai_order(order: Order)`: Menyelesaikan pesanan, mengubah statusnya, dan memberitahu pengguna.
+    - `proses_order()`: Memproses tiap item dalam suatu pesanan jika status pesanan memenuhi.
+
     """
     def __init__(self, username: str, password: str):
         self._username = username
@@ -47,9 +46,9 @@ class Admin:
             messagebox.showinfo("Berhasil", "Logout berhasil.")
         
     def proses_order(self, order: Order, selesai: list):
-        """Mengambil pesanan terdepan dari antrean, mengubah statusnya, lalu memproses tiap itemnya."""
-        if order.status != Status.CONFIRMED:
-            messagebox.showerror("Error", "Tidak dapat memproses pesanan ini. Sat")
+        """Memproses tiap item dalam suatu pesanan jika status pesanan memenuhi."""
+        if order.status != Status.IN_PROGRESS:
+            messagebox.showerror("Error", "Tidak dapat memproses pesanan ini. Pesanan tidak dalam antrean.")
             return
         
         for i, (item, qty) in enumerate(order.items.items(), start=0):
