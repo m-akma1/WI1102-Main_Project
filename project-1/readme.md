@@ -1,5 +1,5 @@
-# Projek I: Sistem Pemesanan Makanan
-**Projek I Mata Kuliah WI1102 - Berpikir Komputasional**  
+# Projek 1: Sistem Pemesanan Makanan
+**Projek 1 Mata Kuliah WI1102 - Berpikir Komputasional**  
 Kelas 31 - Kelompok 5:
 1. Tiara Clianta Andiwi (19624218) 
 2. Muhammad Akmal (19624235) 
@@ -27,7 +27,7 @@ pip install pillow
 ```
 2. Unduh zip file program ini dengan cara klik tombol "Code" hijau di atas dan pilih "Download ZIP", lalu ekstrak file zip yang sudah diunduh.
 3. Buka terminal atau Command Prompt, pindah ke direktori tempat file program ini disimpan, lalu jalankan program dengan perintah berikut.  
-*Catatan: Pastikan Anda berada di dalam folder `program` sebelum menjalankan perintah berikut.*
+*Catatan: Pastikan Anda berada di dalam folder `project-1` sebelum menjalankan perintah berikut.*
 ```sh
 python main.py
 ```
